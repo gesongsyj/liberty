@@ -20,7 +20,7 @@ public class KlineController extends BaseController {
 	public static void main(String[] args) {
 		Long long1 = Long.valueOf("12913000");
 		Long long2 = Long.valueOf("10000");
-		Long long3 = long1/long2;
+		Long long3 = long1 / long2;
 		System.out.println(long3);
 	}
 
@@ -29,8 +29,8 @@ public class KlineController extends BaseController {
 	 * 
 	 */
 	public void downloadData() {
-		Map<String, List<Kline>> klineMap=new HashMap<String, List<Kline>>();
-		Map<String, Kline> lastKlineMap=new HashMap<String,Kline>();
+		Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
+		Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 		String response = "";
 		String dataUrl = "http://webforex.hermes.hexun.com/forex/kline";
 		Map<String, String> params = new HashMap<String, String>();
@@ -44,7 +44,7 @@ public class KlineController extends BaseController {
 		params.put("type", "5");// 日K线
 
 		for (Currency currency : listAll) {
-			List<Kline> klineList=new ArrayList<Kline>();
+			List<Kline> klineList = new ArrayList<Kline>();
 			params.put("code", "FOREX" + currency.getCode());// 设置code参数
 
 			Kline lastKline = Kline.dao.getLastByCode(currency.getCode());
@@ -76,9 +76,11 @@ public class KlineController extends BaseController {
 					kline.setDate(DateUtil.strDate(parseArray2.get(0).toString(), "yyyyMMddHHmmss"));
 					kline.setMax(Double.valueOf(parseArray2.get(4).toString()) / Double.valueOf(priceMul.toString()));
 					kline.setMin(Double.valueOf(parseArray2.get(5).toString()) / Double.valueOf(priceMul.toString()));
+					kline.setCurrencyId(currency.getId());
+					
 					klineList.add(kline);
 				}
-				
+
 				klineMap.put(currency.getCode(), klineList);
 				renderText(response);
 				return;
@@ -86,6 +88,7 @@ public class KlineController extends BaseController {
 				e.printStackTrace();
 			}
 		}
+		Kline.dao.saveMany(klineMap,lastKlineMap);
 		renderText(response);
 	}
 

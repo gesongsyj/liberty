@@ -1,5 +1,8 @@
 package com.liberty.system.model;
 
+import java.util.List;
+import java.util.Map;
+
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.SqlPara;
@@ -21,5 +24,24 @@ public class Kline extends BaseKline<Kline> {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code));
 		Kline kline = dao.findFirst(sqlPara);
 		return kline;
+	}
+	
+	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap){
+		for (String code : klineMap.keySet()) {
+			List<Kline> list = klineMap.get(code);
+			Kline lastKline = lastKlineMap.get(code);
+			if(lastKline==null){
+				for (Kline kline : list) {
+					kline.save();
+				}
+			}else{
+				for (Kline kline : list) {
+					if(kline.getDate().getTime()<lastKline.getDate().getTime()){
+						continue;
+					}
+					kline.save();
+				}
+			}
+		}
 	}
 }
