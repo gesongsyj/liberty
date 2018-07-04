@@ -1,0 +1,9 @@
+#namespace("kline")
+	#include("kline.sql")
+#end
+#namespace("stroke")
+	#include("stroke.sql")
+#end
+#namespace("currency")
+	#include("currency.sql")
+#end
