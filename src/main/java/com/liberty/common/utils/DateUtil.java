@@ -69,10 +69,9 @@ public class DateUtil {
 		return c.getTime();
 	}
 	
-	public static long getDaysBetween(Date date1,Date date2) {
-		date1 = strDate(dateStr(date1, "yyyyMMdd"),"yyyyMMdd");
-		date2 = strDate(dateStr(date2, "yyyyMMdd"),"yyyyMMdd");
-		long difference =  (date1.getTime()-date2.getTime())/86400000;
+	public static long getNumberBetween(Date date1,Date date2,int mills) {
+		// long difference = (date1.getTime()-date2.getTime())/86400000;
+		long difference =  (date1.getTime()-date2.getTime())/mills;
         return Math.abs(difference);
 	}
 }

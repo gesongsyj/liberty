@@ -1,9 +1,11 @@
 package com.liberty.system.model;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.jfinal.kit.Kv;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.liberty.system.model.base.BaseKline;
@@ -15,32 +17,37 @@ import com.liberty.system.query.KlineQueryObject;
 @SuppressWarnings("serial")
 public class Kline extends BaseKline<Kline> {
 	public static final Kline dao = new Kline().dao();
+
 	public Page<Kline> paginate(KlineQueryObject qo) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("qo", qo));
 		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
 	}
-	
-	public Kline getLastByCode(String code) {
-		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code));
+
+	public Kline getLastByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
 		Kline kline = dao.findFirst(sqlPara);
 		return kline;
 	}
-	
-	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap){
+
+	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap) {
 		for (String code : klineMap.keySet()) {
 			List<Kline> list = klineMap.get(code);
+			if (list != null && list.size() >= 1) {
+				list.remove(list.size() - 1);// 最后一条数据是实时数据,会不断变化,不保存
+			}
 			Kline lastKline = lastKlineMap.get(code);
-			if(lastKline==null){
-				for (Kline kline : list) {
-					kline.save();
-				}
-			}else{
-				for (Kline kline : list) {
-					if(kline.getDate().getTime()<lastKline.getDate().getTime()){
-						continue;
+			if (lastKline == null) {
+				Db.batchSave(list, list.size());
+			} else {
+				Iterator<Kline> it = list.iterator();
+				while (it.hasNext()) {
+					Kline kline = it.next();
+					if (kline.getDate().getTime() <= lastKline.getDate().getTime()) {
+						it.remove();
 					}
-					kline.save();
 				}
+
+				Db.batchSave(list, list.size());
 			}
 		}
 	}
