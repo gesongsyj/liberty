@@ -1,5 +1,6 @@
 package com.liberty.system.model;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,18 +24,15 @@ public class Kline extends BaseKline<Kline> {
 		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
 	}
 
-	public Kline getLastByCode(String code, String type) {
+	public List<Kline> getLastByCode(String code, String type) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
-		Kline kline = dao.findFirst(sqlPara);
-		return kline;
+		List<Kline> list = dao.find(sqlPara);
+		return list;
 	}
 
 	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap) {
 		for (String code : klineMap.keySet()) {
 			List<Kline> list = klineMap.get(code);
-			if (list != null && list.size() >= 1) {
-				list.remove(list.size() - 1);// 最后一条数据是实时数据,会不断变化,不保存
-			}
 			Kline lastKline = lastKlineMap.get(code);
 			if (lastKline == null) {
 				Db.batchSave(list, list.size());
@@ -51,4 +49,24 @@ public class Kline extends BaseKline<Kline> {
 			}
 		}
 	}
+
+	public List<Kline> listAllByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
+		List<Kline> list = dao.find(sqlPara);
+		return list;
+	}
+
+	public List<Kline> getListByDate(String code, String type, Date date) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type).set("date", date));
+		List<Kline> list = dao.find(sqlPara);
+		return list;
+	}
+
+	public List<Kline> getByDateRange(String code, String type, Date startDate, Date endDate) {
+		SqlPara sqlPara = getSqlParaFromTemplate(
+				Kv.by("code", code).set("type", type).set("startDate", startDate).set("endDate", endDate));
+		List<Kline> list = dao.find(sqlPara);
+		return list;
+	}
+
 }

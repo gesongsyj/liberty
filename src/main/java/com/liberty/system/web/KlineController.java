@@ -16,6 +16,8 @@ import com.liberty.common.utils.HTTPUtils;
 import com.liberty.common.web.BaseController;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
+import com.liberty.system.model.Shape;
+import com.liberty.system.model.Stroke;
 
 public class KlineController extends BaseController {
 	private static final Map<String, String> klineTypeNumberMap;
@@ -42,10 +44,20 @@ public class KlineController extends BaseController {
 
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
-		Date date1 = new Date(2018, 7, 5, 5, 56, 12);
-		Date date2 = new Date(2018, 7, 3, 4, 56, 12);
-		long daysBetween = DateUtil.getNumberBetween(date2, date1, 86400000);
-		System.out.println(daysBetween);
+		// Date date1 = new Date(2018, 7, 5, 5, 56, 12);
+		// Date date2 = new Date(2018, 7, 3, 4, 56, 12);
+		// long daysBetween = DateUtil.getNumberBetween(date2, date1, 86400000);
+		// System.out.println(daysBetween);
+
+		List<Shape> shapes = new ArrayList<>();
+		shapes.add(new Shape().setMax(100.0));
+		Shape last = shapes.get(shapes.size() - 1);
+		System.out.println(last.equals(shapes.get(shapes.size() - 1)));
+		last = new Shape().setMax(99.0);
+
+		System.err.println(last.getMax());
+		System.err.println(shapes.get(shapes.size() - 1).getMax());
+		System.out.println(last.equals(shapes.get(shapes.size() - 1)));
 	}
 
 	/**
@@ -66,23 +78,34 @@ public class KlineController extends BaseController {
 		String sql = "select * from dictionary where type='klineType'";
 		List<Record> klineTyep = Db.find(sql);
 		for (Record record : klineTyep) {
+			//================测试
+			if(!record.getStr("key").equals("1")){
+				continue;
+			}
+			//================
 			Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
 			Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 			params.put("type", record.getStr("key"));// K线级别
 
 			for (Currency currency : listAll) {
+				//===========测试
+				if(!currency.getCode().equals("EURUSD")){
+					continue;
+				}
+				//===========
 				List<Kline> klineList = new ArrayList<Kline>();
 				params.put("code", "FOREX" + currency.getCode());// 设置code参数
-
-				Kline lastKline = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
+				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
+				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
 				// 设置number参数
-				if (lastKline == null) {
+				if (lastTwo == null || lastTwo.size() == 0) {
 					params.put("number", klineTypeNumberMap.get(record.getStr("key")) == null ? "-1000"
 							: klineTypeNumberMap.get(record.getStr("key")));
 				} else {
-					lastKlineMap.put(currency.getCode(), lastKline);
-					Date lastDate = lastKline.getDate();
-					long between= DateUtil.getNumberBetween(DateUtil.getNextDay(now), lastDate,
+					lastTwo.get(0).delete();
+					lastKlineMap.put(currency.getCode(), lastTwo.get(1));
+					Date lastDate = lastTwo.get(1).getDate();
+					long between = DateUtil.getNumberBetween(DateUtil.getNextDay(now), lastDate,
 							klineTypeBetweenMap.get(record.getStr("key")));
 					String number = String.valueOf(between);
 					params.put("number", "-" + number);
@@ -122,6 +145,40 @@ public class KlineController extends BaseController {
 			Kline.dao.saveMany(klineMap, lastKlineMap);
 		}
 		renderText(response);
+	}
+
+	public void createStroke() {
+		// List<Kline> klines=new ArrayList<>();
+		// klines.add(new Kline().setMax(100.00).setMin(10.0));
+		// klines.add(new Kline().setMax(99.00).setMin(11.0));
+		// klines.add(new Kline().setMax(98.00).setMin(12.0));
+		// klines.add(new Kline().setMax(101.00).setMin(20.0));
+		// klines.add(new Kline().setMax(102.00).setMin(30.0));
+		// klines.add(new Kline().setMax(103.00).setMin(1.0));
+		// klines.add(new Kline().setMax(102.00).setMin(20.0));
+		// klines.add(new Kline().setMax(101.00).setMin(10.0));
+		// klines.add(new Kline().setMax(103.00).setMin(9.0));
+		// List<Kline> handleInclude = handleInclude(klines, null);
+
+		Stroke lastStroke = Stroke.dao.getLast();
+
+		if (lastStroke == null) {
+			// 查询所有的K线
+			List<Kline> klines = Kline.dao.listAllByCode("EURUSD", "1");
+			// 处理K线的包含关系
+			List<Kline> handleInclude = handleInclude(klines, lastStroke);
+			// 生成笔
+			List<Stroke> strokes = processStroke(handleInclude, lastStroke);
+		} else {
+			// 查询最后一笔之后的K线
+			Date date = lastStroke.getEndDate();
+			List<Kline> klines = Kline.dao.getListByDate("EURUSD", "1", date);
+			// 处理K线的包含关系
+			List<Kline> handleInclude = handleInclude(klines, lastStroke);
+			// 生成笔
+			List<Stroke> strokes = processStroke(handleInclude, lastStroke);
+		}
+		renderText("ok");
 	}
 
 }

@@ -7,3 +7,9 @@
 		#set(flag=1)
 	#end
 #end
+
+#sql("getLast")
+	select *
+	from stroke
+	order by endDate desc
+#end
