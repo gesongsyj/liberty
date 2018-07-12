@@ -403,6 +403,8 @@ public class BaseController extends Controller {
 		List<Stroke> strokes = new ArrayList<Stroke>();
 		List<Shape> shapes = new ArrayList<Shape>();
 		int index = 0;
+		int strokeStartIndex = 0;
+		int strokeEndIndex = 0;
 
 		if (inStroke != null) {
 			strokes.add(inStroke);
@@ -414,11 +416,12 @@ public class BaseController extends Controller {
 			}
 		}
 
-		for (int i = 0; i < klines.size() - 2; i++) {
+		outterFor: for (int i = 0; i < klines.size() - 2; i++) {
 			if (Shape.dao.isHighShape(klines.get(i), klines.get(i + 1), klines.get(i + 2))) {// 顶分型
 				Shape shape = new Shape().setType("0");
 				shape.setMax(klines.get(i + 1).getMax());
 				shape.setDate(klines.get(i + 1).getDate());
+				strokeEndIndex = i + 1;// ++++++++++++++++++++++
 
 				if (shapes.size() == 0) {// 第一个分型
 					shapes.add(shape);
@@ -432,7 +435,6 @@ public class BaseController extends Controller {
 							if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
 									klines.get(i + 2))) {
 								shapes.add(shape);
-								index = i + 1;
 								Stroke gapStroke = new Stroke();
 								gapStroke.setCurrencyId(currencyId);
 								gapStroke.setMax(shape.getMax());
@@ -446,6 +448,8 @@ public class BaseController extends Controller {
 								lastStroke.setNextId(gapStroke.getId());
 								lastStroke.update(code, type);
 								strokes.add(gapStroke);
+								index = i + 1;
+								strokeStartIndex = i + 1;// ++++++++++++++
 							} else {
 								continue;
 							}
@@ -456,6 +460,7 @@ public class BaseController extends Controller {
 								lastShape.setDate(shape.getDate());
 								lastShape.setMax(shape.getMax());
 								index = i + 1;
+								strokeStartIndex = i + 1;// ++++++++++++++
 								if (strokes.size() != 0) {
 									Stroke lastStroke = strokes.get(strokes.size() - 1);
 									lastStroke.setMax(shape.getMax());
@@ -464,8 +469,13 @@ public class BaseController extends Controller {
 								}
 							}
 						} else {
+							for (int j = strokeStartIndex + 1; j < strokeEndIndex; j++) {
+								if (klines.get(j).getMax() > shape.getMax()
+										|| klines.get(j).getMin() < lastShape.getMin()) {
+									continue outterFor;
+								}
+							}
 							shapes.add(shape);
-							index = i + 1;
 							Stroke stroke = new Stroke();
 							stroke.setCurrencyId(currencyId);
 							stroke.setMax(shape.getMax());
@@ -482,6 +492,8 @@ public class BaseController extends Controller {
 								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);
 							}
 							strokes.add(stroke);
+							index = i + 1;
+							strokeStartIndex = i + 1;// ++++++++++++++
 						}
 					}
 				}
@@ -489,6 +501,7 @@ public class BaseController extends Controller {
 				Shape shape = new Shape().setType("1");
 				shape.setMin(klines.get(i + 1).getMin());
 				shape.setDate(klines.get(i + 1).getDate());
+				strokeEndIndex = i + 1;// ++++++++++++++++++++++
 
 				if (shapes.size() == 0) {// 第一个分型
 					shapes.add(shape);
@@ -502,7 +515,6 @@ public class BaseController extends Controller {
 							if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
 									klines.get(i + 2))) {
 								shapes.add(shape);
-								index = i + 1;
 								Stroke gapStroke = new Stroke();
 								gapStroke.setCurrencyId(currencyId);
 								gapStroke.setMin(shape.getMin());
@@ -516,6 +528,8 @@ public class BaseController extends Controller {
 								lastStroke.setNextId(gapStroke.getId());
 								lastStroke.update(code, type);
 								strokes.add(gapStroke);
+								index = i + 1;
+								strokeStartIndex = i + 1;// ++++++++++++++
 							} else {
 								continue;
 							}
@@ -526,6 +540,7 @@ public class BaseController extends Controller {
 								lastShape.setDate(shape.getDate());
 								lastShape.setMin(shape.getMin());
 								index = i + 1;
+								strokeStartIndex = i + 1;// ++++++++++++++
 								if (strokes.size() != 0) {
 									Stroke lastStroke = strokes.get(strokes.size() - 1);
 									lastStroke.setMin(shape.getMin());
@@ -534,8 +549,13 @@ public class BaseController extends Controller {
 								}
 							}
 						} else {
+							for (int j = strokeStartIndex + 1; j < strokeEndIndex; j++) {
+								if (klines.get(j).getMax() > lastShape.getMax()
+										|| klines.get(j).getMin() < shape.getMin()) {
+									continue outterFor;
+								}
+							}
 							shapes.add(shape);
-							index = i + 1;
 							Stroke stroke = new Stroke();
 							stroke.setCurrencyId(currencyId);
 							stroke.setMin(shape.getMin());
@@ -552,6 +572,8 @@ public class BaseController extends Controller {
 								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);
 							}
 							strokes.add(stroke);
+							index = i + 1;
+							strokeStartIndex = i + 1;// ++++++++++++++
 						}
 					}
 				}

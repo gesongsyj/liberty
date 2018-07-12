@@ -79,9 +79,9 @@ public class KlineController extends BaseController {
 		List<Record> klineTyep = Db.find(sql);
 		for (Record record : klineTyep) {
 			//================测试
-			if(!record.getStr("key").equals("1")){
-				continue;
-			}
+//			if(!record.getStr("key").equals("1")){
+//				continue;
+//			}
 			//================
 			Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
 			Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
@@ -89,9 +89,9 @@ public class KlineController extends BaseController {
 
 			for (Currency currency : listAll) {
 				//===========测试
-				if(!currency.getCode().equals("EURUSD")){
-					continue;
-				}
+//				if(!currency.getCode().equals("EURUSD")){
+//					continue;
+//				}
 				//===========
 				List<Kline> klineList = new ArrayList<Kline>();
 				params.put("code", "FOREX" + currency.getCode());// 设置code参数
