@@ -56,7 +56,7 @@ public class CurrencyController extends BaseController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		renderText(response);
+		renderText(response);
 	}
 
 }
