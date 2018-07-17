@@ -13,7 +13,6 @@ import com.liberty.common.web.BaseController;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.query.KlineQueryObject;
-import com.liberty.system.service.KlineService;
 
 public class CurrencyController extends BaseController {
 

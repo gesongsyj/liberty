@@ -19,7 +19,6 @@ import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Response;
 
 import com.alibaba.fastjson.JSON;
 
@@ -53,8 +52,9 @@ public class HTTPUtils {
 		client.getParams().setHttpElementCharset(UTF8);
 	}
 
-	public static String http(String url, Map<String, String> params, String method) throws Exception {
+	public static String http(String url, Map<String, String> params, String method) {
 		String response = "";
+		URL httpUrl = null;
 		if (method.equalsIgnoreCase("GET")) {
 			if (params != null && params.size() != 0) {
 				url = url + "?";
@@ -64,11 +64,21 @@ public class HTTPUtils {
 				url = url + paramName + "=" + paramValue + "&";
 			}
 			url = url.substring(0, url.length() - 1);
-			URL httpUrl = new URL(url);
+			try {
+				httpUrl = new URL(url);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			response = get(httpUrl);
 		} else if (method.equalsIgnoreCase("POST")) {
 			String jsonString = JSON.toJSONString(params);
-			URL httpUrl = new URL(url);
+			try {
+				httpUrl = new URL(url);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			response = post(httpUrl, jsonString);
 		}
 		return response;

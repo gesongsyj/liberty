@@ -5,10 +5,8 @@ import com.jfinal.plugin.activerecord.Page;
 import com.liberty.common.web.BaseController;
 import com.liberty.system.model.Stroke;
 import com.liberty.system.query.StrokeQueryObject;
-import com.liberty.system.service.StrokeService;
 
 public class StrokeController extends BaseController {
-	StrokeService strokeService = new StrokeService();
 
 	public void testSave() {
 		for (int i = 0; i < 20; i++) {

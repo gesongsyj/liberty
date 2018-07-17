@@ -18,13 +18,16 @@ import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
+import com.liberty.system.service.DownLoader;
+import com.liberty.system.service.HxDownLoader;
 
 public class KlineController extends BaseController {
 	private static final Map<String, String> klineTypeNumberMap;
 	private static final Map<String, Integer> klineTypeBetweenMap;
 	static {
 		klineTypeNumberMap = new HashMap<String, String>();
-		klineTypeNumberMap.put("1", "-1440");// 5分钟线
+		klineTypeNumberMap.put("1", "-200000");// 5分钟线
+		// klineTypeNumberMap.put("1", "-1440");// 5分钟线
 		klineTypeNumberMap.put("2", "-960");// 15分钟线
 		klineTypeNumberMap.put("3", "-960");// 30分钟线
 		klineTypeNumberMap.put("4", "-720");// 60分钟线
@@ -49,50 +52,53 @@ public class KlineController extends BaseController {
 		// long daysBetween = DateUtil.getNumberBetween(date2, date1, 86400000);
 		// System.out.println(daysBetween);
 
-		List<Shape> shapes = new ArrayList<>();
-		shapes.add(new Shape().setMax(100.0));
-		Shape last = shapes.get(shapes.size() - 1);
-		System.out.println(last.equals(shapes.get(shapes.size() - 1)));
-		last = new Shape().setMax(99.0);
+		// List<Shape> shapes = new ArrayList<>();
+		// shapes.add(new Shape().setMax(100.0));
+		// Shape last = shapes.get(shapes.size() - 1);
+		// System.out.println(last.equals(shapes.get(shapes.size() - 1)));
+		// last = new Shape().setMax(99.0);
+		//
+		// System.err.println(last.getMax());
+		// System.err.println(shapes.get(shapes.size() - 1).getMax());
+		// System.out.println(last.equals(shapes.get(shapes.size() - 1)));
 
-		System.err.println(last.getMax());
-		System.err.println(shapes.get(shapes.size() - 1).getMax());
-		System.out.println(last.equals(shapes.get(shapes.size() - 1)));
+		long date = Long.valueOf("1531789177122");
+		date = date - 8 * 60 * 60 * 1000;
+		System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(date)));
+
 	}
 
 	/**
-	 * K线数据下载
+	 * 新浪 K线数据下载
 	 * 
 	 */
-	public void downloadData() {
+	public void xlDownloadData() {
 		String response = "";
-		String dataUrl = "http://webforex.hermes.hexun.com/forex/kline";
+		String dataUrl = "https://ex.sina.com.cn/forex/api/jsonp.php/var%20_fx_seurusd_1_1531791999571=/NewForexService.getMinKline?symbol=fx_seurusd&scale=1&datalen=1440";
+		String dataUrl1 = "https://ex.sina.com.cn/forex/api/jsonp.php/var%20_fx_seurusd2018_7_17=/NewForexService.getDayKLine?symbol=fx_seurusd&_=2018_7_17";
 		Map<String, String> params = new HashMap<String, String>();
 		List<Currency> listAll = Currency.dao.listAll();
 
 		Date now = new Date();
-		Date tomorrow = DateUtil.getNextDay(now);
-		String tomorrowFormat = new SimpleDateFormat("yyyyMMdd").format(tomorrow);
 
-		params.put("start", tomorrowFormat + "080000");
 		String sql = "select * from dictionary where type='klineType'";
 		List<Record> klineTyep = Db.find(sql);
 		for (Record record : klineTyep) {
-			//================测试
-//			if(!record.getStr("key").equals("1")){
-//				continue;
-//			}
-			//================
+			// ================测试,只取五分钟k线
+			if (!record.getStr("key").equals("1")) {
+				continue;
+			}
+			// ================
 			Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
 			Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 			params.put("type", record.getStr("key"));// K线级别
 
 			for (Currency currency : listAll) {
-				//===========测试
-//				if(!currency.getCode().equals("EURUSD")){
-//					continue;
-//				}
-				//===========
+				// ===========测试,只取eurusd
+				// if (!currency.getCode().equals("EURUSD")) {
+				// continue;
+				// }
+				// ===========
 				List<Kline> klineList = new ArrayList<Kline>();
 				params.put("code", "FOREX" + currency.getCode());// 设置code参数
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
@@ -111,40 +117,88 @@ public class KlineController extends BaseController {
 					params.put("number", "-" + number);
 					// params.put("number", "-" + "10");//测试
 				}
-				try {
-					response = HTTPUtils.http(dataUrl, params, "get");
-					response = response.substring(response.indexOf("{"));
-					response = response.substring(0, response.lastIndexOf("}") + 1);
-					Map<String, Object> responseMap = JSON.parseObject(response, Map.class);
-					Object object = responseMap.get("Data");
-					JSONArray parseArray = JSON.parseArray(object.toString());
-					Object startDate = parseArray.get(1);// 开始时间
-					Object endDate = parseArray.get(2);// 结束时间
-					Object priceMul = parseArray.get(4);// 价格倍数
+				response = HTTPUtils.http(dataUrl, params, "get");
+				response = response.substring(response.indexOf("{"));
+				response = response.substring(0, response.lastIndexOf("}") + 1);
+				Map<String, Object> responseMap = JSON.parseObject(response, Map.class);
+				Object object = responseMap.get("Data");
+				JSONArray parseArray = JSON.parseArray(object.toString());
+				Object startDate = parseArray.get(1);// 开始时间
+				Object endDate = parseArray.get(2);// 结束时间
+				Object priceMul = parseArray.get(4);// 价格倍数
 
-					JSONArray dataArray = JSON.parseArray(parseArray.get(0).toString());// 数据数组
-					for (Object object2 : dataArray) {
-						Kline kline = new Kline();
-						JSONArray parseArray2 = JSON.parseArray(object2.toString());
-						kline.setDate(DateUtil.strDate(parseArray2.get(0).toString(), "yyyyMMddHHmmss"));
-						kline.setMax(
-								Double.valueOf(parseArray2.get(4).toString()) / Double.valueOf(priceMul.toString()));
-						kline.setMin(
-								Double.valueOf(parseArray2.get(5).toString()) / Double.valueOf(priceMul.toString()));
-						kline.setCurrencyId(currency.getId());
-						kline.setType(record.getStr("key"));
+				JSONArray dataArray = JSON.parseArray(parseArray.get(0).toString());// 数据数组
+				for (Object object2 : dataArray) {
+					Kline kline = new Kline();
+					JSONArray parseArray2 = JSON.parseArray(object2.toString());
+					kline.setDate(DateUtil.strDate(parseArray2.get(0).toString(), "yyyyMMddHHmmss"));
+					kline.setMax(Double.valueOf(parseArray2.get(4).toString()) / Double.valueOf(priceMul.toString()));
+					kline.setMin(Double.valueOf(parseArray2.get(5).toString()) / Double.valueOf(priceMul.toString()));
+					kline.setCurrencyId(currency.getId());
+					kline.setType(record.getStr("key"));
 
-						klineList.add(kline);
-					}
-
-					klineMap.put(currency.getCode(), klineList);
-				} catch (Exception e) {
-					e.printStackTrace();
+					klineList.add(kline);
 				}
+
+				klineMap.put(currency.getCode(), klineList);
 			}
 			Kline.dao.saveMany(klineMap, lastKlineMap);
 		}
 		renderText(response);
+	}
+
+	/**
+	 * 和讯 K线数据下载
+	 * 
+	 */
+	public void hexunDownloadData() {
+		DownLoader downLoader = new HxDownLoader();
+		List<Currency> listAll = Currency.dao.listAll();
+
+		String sql = "select * from dictionary where type='hxKlineType'";
+		List<Record> klineTyep = Db.find(sql);
+		for (Record record : klineTyep) {
+			// ================测试,只取五分钟k线
+			if (!record.getStr("key").equals("1")) {
+				continue;
+			}
+			// ================
+			Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
+			Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
+
+			for (Currency currency : listAll) {
+				// ===========测试,只取eurusd
+				// if (!currency.getCode().equals("EURUSD")) {
+				// continue;
+				// }
+				// ===========
+				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
+				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
+				
+				// 设置number参数
+				Kline lastKline=null;
+				if (lastTwo == null || lastTwo.size() <= 1) {
+					if(lastTwo.size()==1){
+						lastTwo.get(0).delete();
+					}
+				} else {
+					lastTwo.get(0).delete();
+					lastKline=lastTwo.get(1);
+					lastKlineMap.put(currency.getCode(), lastKline);
+					Date lastDate = lastTwo.get(1).getDate();
+				}
+
+				List<Kline> klineList = downLoader.downLoad(currency.getCode(), record.getStr("key"), "get",lastKline);
+				for (Kline kline : klineList) {
+					kline.setCurrencyId(currency.getId());
+					kline.setType(record.getStr("key"));
+				}
+
+				klineMap.put(currency.getCode(), klineList);
+			}
+			Kline.dao.saveMany(klineMap, lastKlineMap);
+		}
+		renderText("ok");
 	}
 
 	public void createStroke() {
