@@ -421,51 +421,51 @@ public class BaseController extends Controller {
 				Shape shape = new Shape().setType("0");
 				shape.setMax(klines.get(i + 1).getMax());
 				shape.setDate(klines.get(i + 1).getDate());
-				strokeEndIndex = i + 1;// ++++++++++++++++++++++
+				strokeEndIndex = i + 1;
 
 				if (shapes.size() == 0) {// 第一个分型
 					shapes.add(shape);
 				} else {
 					Shape lastShape = shapes.get(shapes.size() - 1);
-					if (i + 1 - index < 3) {// 分型不成立
-						if (strokes.size() == 0) {
-							continue;
-						} else {// 分型不成立时,判断缺口成笔是否成立
-							Stroke lastStroke = strokes.get(strokes.size() - 1);
-							if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
-									klines.get(i + 2))) {
-								shapes.add(shape);
-								Stroke gapStroke = new Stroke();
-								gapStroke.setCurrencyId(currencyId);
-								gapStroke.setMax(shape.getMax());
-								gapStroke.setMin(lastShape.getMin());
-								gapStroke.setType(type);
-								gapStroke.setStartDate(lastShape.getDate());
-								gapStroke.setEndDate(shape.getDate());
-								gapStroke.setDirection("0");
-								gapStroke.setPrevId(lastStroke.getId());
-								gapStroke.save(code, type);
-								lastStroke.setNextId(gapStroke.getId());
-								lastStroke.update(code, type);
-								strokes.add(gapStroke);
-								index = i + 1;
-								strokeStartIndex = i + 1;// ++++++++++++++
-							} else {
-								continue;
+					if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
+						if (shape.getMax() > lastShape.getMax()) {
+							lastShape.setDate(shape.getDate());
+							lastShape.setMax(shape.getMax());
+							index = i + 1;
+							strokeStartIndex = i + 1;
+							if (strokes.size() != 0) {
+								Stroke lastStroke = strokes.get(strokes.size() - 1);
+								lastStroke.setMax(shape.getMax());
+								lastStroke.setEndDate(shape.getDate());
+								lastStroke.update(code, type);//=================
 							}
 						}
 					} else {
-						if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
-							if (shape.getMax() > lastShape.getMax()) {
-								lastShape.setDate(shape.getDate());
-								lastShape.setMax(shape.getMax());
-								index = i + 1;
-								strokeStartIndex = i + 1;// ++++++++++++++
-								if (strokes.size() != 0) {
-									Stroke lastStroke = strokes.get(strokes.size() - 1);
-									lastStroke.setMax(shape.getMax());
-									lastStroke.setEndDate(shape.getDate());
-									lastStroke.update(code, type);
+						if (i + 1 - index < 3) {// 分型不成立
+							if (strokes.size() == 0) {
+								continue;
+							} else {// 分型不成立时,判断缺口成笔是否成立
+								Stroke lastStroke = strokes.get(strokes.size() - 1);
+								if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
+										klines.get(i + 2))) {
+									shapes.add(shape);
+									Stroke gapStroke = new Stroke();
+									gapStroke.setCurrencyId(currencyId);
+									gapStroke.setMax(shape.getMax());
+									gapStroke.setMin(lastShape.getMin());
+									gapStroke.setType(type);
+									gapStroke.setStartDate(lastShape.getDate());
+									gapStroke.setEndDate(shape.getDate());
+									gapStroke.setDirection("0");
+									gapStroke.setPrevId(lastStroke.getId());
+									gapStroke.save(code, type);//=================
+									lastStroke.setNextId(gapStroke.getId());
+									lastStroke.update(code, type);//=================
+									strokes.add(gapStroke);
+									index = i + 1;
+									strokeStartIndex = i + 1;
+								} else {
+									continue;
 								}
 							}
 						} else {
@@ -487,15 +487,16 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);
+							stroke.save(code, type);//===========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);//=================
 							}
 							strokes.add(stroke);
 							index = i + 1;
-							strokeStartIndex = i + 1;// ++++++++++++++
+							strokeStartIndex = i + 1;
 						}
 					}
+
 				}
 			} else if (Shape.dao.isLowShape(klines.get(i), klines.get(i + 1), klines.get(i + 2))) {// 底分型
 				Shape shape = new Shape().setType("1");
@@ -507,45 +508,45 @@ public class BaseController extends Controller {
 					shapes.add(shape);
 				} else {
 					Shape lastShape = shapes.get(shapes.size() - 1);
-					if (i + 1 - index < 3) {// 分型不成立
-						if (strokes.size() == 0) {
-							continue;
-						} else {// 分型不成立时,判断缺口成笔是否成立
-							Stroke lastStroke = strokes.get(strokes.size() - 1);
-							if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
-									klines.get(i + 2))) {
-								shapes.add(shape);
-								Stroke gapStroke = new Stroke();
-								gapStroke.setCurrencyId(currencyId);
-								gapStroke.setMin(shape.getMin());
-								gapStroke.setMax(lastShape.getMax());
-								gapStroke.setType(type);
-								gapStroke.setStartDate(lastShape.getDate());
-								gapStroke.setEndDate(shape.getDate());
-								gapStroke.setDirection("1");
-								gapStroke.setPrevId(lastStroke.getId());
-								gapStroke.save(code, type);
-								lastStroke.setNextId(gapStroke.getId());
-								lastStroke.update(code, type);
-								strokes.add(gapStroke);
-								index = i + 1;
-								strokeStartIndex = i + 1;// ++++++++++++++
-							} else {
-								continue;
+					if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
+						if (shape.getMin() < lastShape.getMin()) {
+							lastShape.setDate(shape.getDate());
+							lastShape.setMin(shape.getMin());
+							index = i + 1;
+							strokeStartIndex = i + 1;// ++++++++++++++
+							if (strokes.size() != 0) {
+								Stroke lastStroke = strokes.get(strokes.size() - 1);
+								lastStroke.setMin(shape.getMin());
+								lastStroke.setEndDate(shape.getDate());
+								lastStroke.update(code, type);//=================
 							}
 						}
 					} else {
-						if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
-							if (shape.getMin() < lastShape.getMin()) {
-								lastShape.setDate(shape.getDate());
-								lastShape.setMin(shape.getMin());
-								index = i + 1;
-								strokeStartIndex = i + 1;// ++++++++++++++
-								if (strokes.size() != 0) {
-									Stroke lastStroke = strokes.get(strokes.size() - 1);
-									lastStroke.setMin(shape.getMin());
-									lastStroke.setEndDate(shape.getDate());
-									lastStroke.update(code, type);
+						if (i + 1 - index < 3) {// 分型不成立
+							if (strokes.size() == 0) {
+								continue;
+							} else {// 分型不成立时,判断缺口成笔是否成立
+								Stroke lastStroke = strokes.get(strokes.size() - 1);
+								if (Shape.dao.gapToStroke(lastStroke, klines.get(i), klines.get(i + 1),
+										klines.get(i + 2))) {
+									shapes.add(shape);
+									Stroke gapStroke = new Stroke();
+									gapStroke.setCurrencyId(currencyId);
+									gapStroke.setMin(shape.getMin());
+									gapStroke.setMax(lastShape.getMax());
+									gapStroke.setType(type);
+									gapStroke.setStartDate(lastShape.getDate());
+									gapStroke.setEndDate(shape.getDate());
+									gapStroke.setDirection("1");
+									gapStroke.setPrevId(lastStroke.getId());
+									gapStroke.save(code, type);//============
+									lastStroke.setNextId(gapStroke.getId());
+									lastStroke.update(code, type);//=================
+									strokes.add(gapStroke);
+									index = i + 1;
+									strokeStartIndex = i + 1;
+								} else {
+									continue;
 								}
 							}
 						} else {
@@ -567,18 +568,19 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);
+							stroke.save(code, type);//==========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);//=================
 							}
 							strokes.add(stroke);
 							index = i + 1;
-							strokeStartIndex = i + 1;// ++++++++++++++
+							strokeStartIndex = i + 1;
 						}
 					}
 				}
 			}
 		}
+		Stroke.dao.updateKline();
 		return strokes;
 	}
 }

@@ -13,7 +13,8 @@ public class CoreInterceptor implements Interceptor {
 	public void intercept(Invocation inv) {
 		// TODO Auto-generated method stub
 		System.out.println("================Before invoking " + inv.getActionKey());
-		BaseController baseController=(BaseController)inv.getController();
+		long beginTime = System.currentTimeMillis();
+		BaseController baseController = (BaseController) inv.getController();
 
 		if (baseController.getRequest().getMethod().equals("OPTIONS")) {
 			System.out.println("================this is OPTIONS: " + inv.getActionKey());
@@ -23,6 +24,8 @@ public class CoreInterceptor implements Interceptor {
 			baseController.handleAnnotation(inv.getMethod());
 			inv.invoke();
 		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("本次访问共计耗时:" + (endTime - beginTime) + "ms");
 		System.out.println("================After invoking " + inv.getActionKey());
 	}
 }

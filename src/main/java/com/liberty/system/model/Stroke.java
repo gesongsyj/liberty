@@ -1,5 +1,6 @@
 package com.liberty.system.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jfinal.kit.Kv;
@@ -16,14 +17,21 @@ import com.liberty.system.query.StrokeQueryObject;
 public class Stroke extends BaseStroke<Stroke> {
 	public static final Stroke dao = new Stroke().dao();
 	
+	private List<Kline> allKlines=new ArrayList<Kline>();
+	
+	public void updateKline(){
+		Db.batchUpdate(allKlines, allKlines.size());
+		allKlines.clear();
+	}
+	
 	public boolean update(String code,String type) {
 		try {
 			super.update();
 			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
 			for (Kline kline : klines) {
 				kline.setStrokeId(this.getId());
+				allKlines.add(kline);
 			}
-			Db.batchUpdate(klines, klines.size());
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -37,8 +45,8 @@ public class Stroke extends BaseStroke<Stroke> {
 			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
 			for (Kline kline : klines) {
 				kline.setStrokeId(this.getId());
+				allKlines.add(kline);
 			}
-			Db.batchUpdate(klines, klines.size());
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -10,9 +10,11 @@ import com.jfinal.core.JFinal;
 import com.jfinal.kit.PathKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.activerecord.OrderedFieldContainerFactory;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
+import com.liberty.common.interceptor.CoreInterceptor;
 import com.liberty.common.jfinal._MappingKit;
 
 import cn.dreampie.quartz.QuartzPlugin;
@@ -75,6 +77,8 @@ public class CoreConfig extends JFinalConfig {
 
 	@Override
 	public void configInterceptor(Interceptors me) {
+		me.add(new Tx());
+		me.add(new CoreInterceptor());
 	}
 
 	@Override
