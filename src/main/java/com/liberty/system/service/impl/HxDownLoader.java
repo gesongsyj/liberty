@@ -79,28 +79,28 @@ public class HxDownLoader implements DownLoader {
 			response = HTTPUtils.http(dataUrl, params, "get");
 			response = response.substring(response.indexOf("{"));
 			response = response.substring(0, response.lastIndexOf("}") + 1);
+			Map<String, Object> responseMap = JSON.parseObject(response, Map.class);
+			Object object = responseMap.get("Data");
+			JSONArray parseArray = JSON.parseArray(object.toString());
+			Object startDate = parseArray.get(1);// 开始时间
+			Object endDate = parseArray.get(2);// 结束时间
+			Object priceMul = parseArray.get(4);// 价格倍数
+
+			JSONArray dataArray = JSON.parseArray(parseArray.get(0).toString());// 数据数组
+			for (Object object2 : dataArray) {
+				Kline kline = new Kline();
+				JSONArray parseArray2 = JSON.parseArray(object2.toString());
+				kline.setDate(DateUtil.strDate(parseArray2.get(0).toString(), "yyyyMMddHHmmss"));
+				kline.setMax(Double.valueOf(parseArray2.get(4).toString()) / Double.valueOf(priceMul.toString()));
+				kline.setMin(Double.valueOf(parseArray2.get(5).toString()) / Double.valueOf(priceMul.toString()));
+				// kline.setCurrencyId(currency.getId());
+				// kline.setType(record.getStr("key"));
+
+				klineList.add(kline);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
-		}
-		Map<String, Object> responseMap = JSON.parseObject(response, Map.class);
-		Object object = responseMap.get("Data");
-		JSONArray parseArray = JSON.parseArray(object.toString());
-		Object startDate = parseArray.get(1);// 开始时间
-		Object endDate = parseArray.get(2);// 结束时间
-		Object priceMul = parseArray.get(4);// 价格倍数
-
-		JSONArray dataArray = JSON.parseArray(parseArray.get(0).toString());// 数据数组
-		for (Object object2 : dataArray) {
-			Kline kline = new Kline();
-			JSONArray parseArray2 = JSON.parseArray(object2.toString());
-			kline.setDate(DateUtil.strDate(parseArray2.get(0).toString(), "yyyyMMddHHmmss"));
-			kline.setMax(Double.valueOf(parseArray2.get(4).toString()) / Double.valueOf(priceMul.toString()));
-			kline.setMin(Double.valueOf(parseArray2.get(5).toString()) / Double.valueOf(priceMul.toString()));
-			// kline.setCurrencyId(currency.getId());
-			// kline.setType(record.getStr("key"));
-
-			klineList.add(kline);
 		}
 		return klineList;
 	}

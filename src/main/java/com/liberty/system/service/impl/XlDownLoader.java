@@ -61,19 +61,18 @@ public class XlDownLoader implements DownLoader {
 				response = HTTPUtils.http(url, params, "get");
 				response = response.substring(response.indexOf("String(\"") + 8);
 				response = response.substring(0, response.lastIndexOf("\"") + 1);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
 
-			String[] dataArray = response.split("\\|");
-			for (String data : dataArray) {
-				String[] perData = data.split(",");
-				Kline kline = new Kline();
-				kline.setDate(DateUtil.strDate(perData[0], "yyyy-MM-dd"));
-				kline.setMax(Double.valueOf(perData[3]));
-				kline.setMin(Double.valueOf(perData[2]));
-				klineList.add(kline);
+				String[] dataArray = response.split("\\|");
+				for (String data : dataArray) {
+					String[] perData = data.split(",");
+					Kline kline = new Kline();
+					kline.setDate(DateUtil.strDate(perData[0], "yyyy-MM-dd"));
+					kline.setMax(Double.valueOf(perData[3]));
+					kline.setMin(Double.valueOf(perData[2]));
+					klineList.add(kline);
+				}
+			} catch (Exception e) {
+				return null;
 			}
 
 		} else {// 分钟线
@@ -97,18 +96,19 @@ public class XlDownLoader implements DownLoader {
 				response = HTTPUtils.http(url, params, "get");
 				response = response.substring(response.indexOf("["));
 				response = response.substring(0, response.lastIndexOf("]") + 1);
+				JSONArray parseArray = JSON.parseArray(response);
+				for (Object object : parseArray) {
+					Map map = JSON.parseObject(object.toString(), Map.class);
+					Kline kline = new Kline();
+					kline.setMax(Double.valueOf(map.get("h").toString().contains(",")
+							? map.get("h").toString().replaceAll(",", "") : map.get("h").toString()));
+					kline.setMin(Double.valueOf(map.get("l").toString().contains(",")
+							? map.get("l").toString().replaceAll(",", "") : map.get("l").toString()));
+					kline.setDate(DateUtil.strDate(map.get("d").toString(), "yyyy-MM-dd HH:mm:ss"));
+					klineList.add(kline);
+				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				return null;
-			}
-			JSONArray parseArray = JSON.parseArray(response);
-			for (Object object : parseArray) {
-				Map map = JSON.parseObject(object.toString(), Map.class);
-				Kline kline = new Kline();
-				kline.setMax(Double.valueOf(map.get("h").toString()));
-				kline.setMin(Double.valueOf(map.get("l").toString()));
-				kline.setDate(DateUtil.strDate(map.get("d").toString(), "yyyy-MM-dd HH:mm:ss"));
-				klineList.add(kline);
 			}
 		}
 

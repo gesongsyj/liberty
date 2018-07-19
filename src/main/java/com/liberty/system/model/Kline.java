@@ -1,5 +1,6 @@
 package com.liberty.system.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -31,11 +32,12 @@ public class Kline extends BaseKline<Kline> {
 	}
 
 	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap) {
+		List<Kline> allKlines = new ArrayList<Kline>();
 		for (String code : klineMap.keySet()) {
 			List<Kline> list = klineMap.get(code);
 			Kline lastKline = lastKlineMap.get(code);
 			if (lastKline == null) {
-				Db.batchSave(list, list.size());
+				allKlines.addAll(list);
 			} else {
 				Iterator<Kline> it = list.iterator();
 				while (it.hasNext()) {
@@ -44,10 +46,10 @@ public class Kline extends BaseKline<Kline> {
 						it.remove();
 					}
 				}
-
-				Db.batchSave(list, list.size());
+				allKlines.addAll(list);
 			}
 		}
+		Db.batchSave(allKlines, 5000);
 	}
 
 	public List<Kline> listAllByCode(String code, String type) {

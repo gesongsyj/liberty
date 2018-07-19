@@ -9,8 +9,10 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.jfinal.aop.Before;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
 import com.liberty.common.web.BaseController;
@@ -69,10 +71,11 @@ public class KlineController extends BaseController {
 		// System.out.println(new SimpleDateFormat("yyyy-MM-dd
 		// HH:mm:ss").format(new Date(date)));
 
-//		String[] split = "12|34|56|".split("\\|");
-//
-//		System.out.println(split[1]);
-		
+		// String[] split = "12|34|56|".split("\\|");
+		//
+		// System.out.println(split[1]);
+
+		System.out.println("1,1,24.78000".replaceAll(",", ""));
 
 	}
 
@@ -80,26 +83,27 @@ public class KlineController extends BaseController {
 	 * K线数据下载
 	 * 
 	 */
+	@Before(Tx.class)
 	public void downloadData() {
 		DownLoader downLoader = new XlDownLoader();
 		List<Currency> listAll = Currency.dao.listAll();
 
 		String sql = "select * from dictionary where type='klineType'";
 		List<Record> klineTyep = Db.find(sql);
+		Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
+		Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 		for (Record record : klineTyep) {
-			// ================测试,只取五分钟k线
-			if (!record.getStr("key").equals("7")) {
-				continue;
-			}
+			// ================测试
+			 if (!record.getStr("key").equals("2")) {
+			 continue;
+			 }
 			// ================
-			Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
-			Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 
 			for (Currency currency : listAll) {
 				// ===========测试,只取eurusd
-				if (!currency.getCode().equals("EURUSD")) {
-					continue;
-				}
+				// if (!currency.getCode().equals("EURUSD")) {
+				// continue;
+				// }
 				// ===========
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
 				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
@@ -112,11 +116,11 @@ public class KlineController extends BaseController {
 				} else {
 					lastTwo.get(0).delete();
 					lastKline = lastTwo.get(1);
-					lastKlineMap.put(currency.getCode(), lastKline);
+					lastKlineMap.put(currency.getCode() + "_" + record.getStr("key"), lastKline);
 				}
 				List<Kline> klineList = null;
 				klineList = downLoader.downLoad(currency.getCode(), record.getStr("key"), "get", lastKline);
-				if(klineList==null || klineList.size()==0){
+				if (klineList == null || klineList.size() == 0) {
 					continue;
 				}
 				for (Kline kline : klineList) {
@@ -124,13 +128,14 @@ public class KlineController extends BaseController {
 					kline.setType(record.getStr("key"));
 				}
 
-				klineMap.put(currency.getCode(), klineList);
+				klineMap.put(currency.getCode() + "_" + record.getStr("key"), klineList);
 			}
-			Kline.dao.saveMany(klineMap, lastKlineMap);
 		}
+		Kline.dao.saveMany(klineMap, lastKlineMap);
 		renderText("ok");
 	}
 
+	@Before(Tx.class)
 	public void createStroke() {
 		// List<Kline> klines=new ArrayList<>();
 		// klines.add(new Kline().setMax(100.00).setMin(10.0));

@@ -395,7 +395,6 @@ public class BaseController extends Controller {
 		return noIncludedKlines;
 	}
 
-	@Before(Tx.class)
 	public List<Stroke> processStroke(List<Kline> klines, Stroke inStroke) {
 		int currencyId = klines.get(0).getCurrencyId();
 		String code = Currency.dao.findById(currencyId).getCode();

@@ -16,8 +16,8 @@ public class RoutineController extends BaseController implements Job {
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
-//		AuthrecordController authrecordController = new AuthrecordController();
-//		authrecordController.downloadFtp();
+		KlineController klineController = new KlineController();
+		klineController.downloadData();
 		
 	}
 	
