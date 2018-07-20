@@ -34,6 +34,7 @@ public class XlDownLoader implements DownLoader {
 		klineTypeNumberMap.put("4", "240");// 30分钟线
 		klineTypeNumberMap.put("5", "120");// 60分钟线
 		klineTypeNumberMap.put("6", "60");// 4H线
+		klineTypeNumberMap.put("7", "1000");// 日线
 
 		klineTypeBetweenMap = new HashMap<String, Integer>();
 		klineTypeBetweenMap.put("1", 60 * 1000);
@@ -69,7 +70,10 @@ public class XlDownLoader implements DownLoader {
 					kline.setDate(DateUtil.strDate(perData[0], "yyyy-MM-dd"));
 					kline.setMax(Double.valueOf(perData[3]));
 					kline.setMin(Double.valueOf(perData[2]));
-					klineList.add(kline);
+					if (DateUtil.getNumberBetween(kline.getDate(), now, klineTypeBetweenMap.get("7")) < Long
+							.valueOf(klineTypeNumberMap.get("7"))) {
+						klineList.add(kline);
+					}
 				}
 			} catch (Exception e) {
 				return null;

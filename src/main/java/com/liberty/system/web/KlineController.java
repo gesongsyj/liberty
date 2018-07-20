@@ -94,7 +94,7 @@ public class KlineController extends BaseController {
 		Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 		for (Record record : klineTyep) {
 			// ================测试
-			 if (!record.getStr("key").equals("2")) {
+			 if (!record.getStr("key").equals("7")) {
 			 continue;
 			 }
 			// ================
