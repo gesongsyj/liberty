@@ -161,7 +161,7 @@ public class KlineController extends BaseController {
 		} else {
 			// 查询最后一笔之后的K线
 			Date date = lastStroke.getEndDate();
-			List<Kline> klines = Kline.dao.getListByDate("EURUSD", "1", date);
+			List<Kline> klines = Kline.dao.getListByDate("EURUSD", "7", date);
 			// 处理K线的包含关系
 			List<Kline> handleInclude = handleInclude(klines, lastStroke);
 			// 生成笔

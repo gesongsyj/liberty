@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache updateCheck="false" name="defaultCache">
+
+  <diskStore path="../temp/ehcache/default"/>
+
+  <!-- DefaultCache setting. -->
+  <defaultCache maxEntriesLocalHeap="100" eternal="false" timeToIdleSeconds="300" timeToLiveSeconds="600"
+                overflowToDisk="true" maxEntriesLocalDisk="100000" maxElementsInMemory="500"/>
+
+  <!-- 用户缓存 -->
+  <cache name="deviceId_key" maxElementsInMemory="500" eternal="false" timeToLiveSeconds="3600"
+         timeToIdleSeconds="360" overflowToDisk="true"/>
+
+</ehcache>

@@ -18,7 +18,7 @@ public class RoutineController extends BaseController implements Job {
 			throws JobExecutionException {
 		KlineController klineController = new KlineController();
 		klineController.downloadData();
-		
+		klineController.createStroke();
 	}
 	
 }

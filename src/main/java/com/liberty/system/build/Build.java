@@ -5,6 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.generator.MyGenerator.MyGenerator;
+import com.jfinal.aop.Duang;
+import com.jfinal.kit.PropKit;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.activerecord.dialect.MysqlDialect;
+import com.jfinal.plugin.druid.DruidPlugin;
+import com.jfinal.plugin.redis.Redis;
+import com.jfinal.plugin.redis.RedisPlugin;
 import com.liberty.common.utils.HTTPUtils;
 
 public class Build {
@@ -20,6 +27,10 @@ public class Build {
 //		params.put("ip", "218.94.149.27");
 //		params.put("ak", "218.94.149.27");
 //		HTTPUtils.http(url, params, method)
+		
+		JfinalConfig duang = Duang.duang(JfinalConfig.class);
+		duang.start();
+		duang.test();
 		
 	}
 }
