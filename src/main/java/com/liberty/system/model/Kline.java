@@ -10,6 +10,7 @@ import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.SqlPara;
+import com.liberty.common.utils.MACD;
 import com.liberty.system.model.base.BaseKline;
 import com.liberty.system.query.KlineQueryObject;
 
@@ -32,13 +33,12 @@ public class Kline extends BaseKline<Kline> {
 	}
 
 	public void saveMany(Map<String, List<Kline>> klineMap, Map<String, Kline> lastKlineMap) {
+		MACD macd = new MACD();// 计算macd红绿柱的值
 		List<Kline> allKlines = new ArrayList<Kline>();
 		for (String code : klineMap.keySet()) {
 			List<Kline> list = klineMap.get(code);
 			Kline lastKline = lastKlineMap.get(code);
-			if (lastKline == null) {
-				allKlines.addAll(list);
-			} else {
+			if (lastKline != null) {
 				Iterator<Kline> it = list.iterator();
 				while (it.hasNext()) {
 					Kline kline = it.next();
@@ -46,8 +46,9 @@ public class Kline extends BaseKline<Kline> {
 						it.remove();
 					}
 				}
-				allKlines.addAll(list);
 			}
+			macd.calMacd(list, lastKline);
+			allKlines.addAll(list);
 		}
 		Db.batchSave(allKlines, 5000);
 	}

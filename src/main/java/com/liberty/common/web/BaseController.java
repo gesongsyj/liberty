@@ -33,6 +33,7 @@ import com.liberty.common.utils.IpKit;
 import com.liberty.common.utils.JsonToMap;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
+import com.liberty.system.model.Line;
 import com.liberty.system.model.Log;
 import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
@@ -395,7 +396,27 @@ public class BaseController extends Controller {
 		return noIncludedKlines;
 	}
 
-	public List<Stroke> processStroke(List<Kline> klines, Stroke inStroke) {
+	public List<Line> processLines(List<Stroke> strokes, Line line) {
+		Integer currencyId = strokes.get(0).getCurrencyId();
+		if(line!=null){
+			
+		}else{
+			for (int i = 0; i < strokes.size(); i++) {
+				if("0".equals(strokes.get(0).getDirection())){//第一笔向上
+					
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	public List<Line> loopProcessLines(List<Stroke> strokes,List<Line> lines){
+		
+		return lines;
+	}
+	
+	public List<Stroke> processStrokes(List<Kline> klines, Stroke inStroke) {
 		int currencyId = klines.get(0).getCurrencyId();
 		String code = Currency.dao.findById(currencyId).getCode();
 		String type = klines.get(0).getType();
@@ -436,7 +457,7 @@ public class BaseController extends Controller {
 								Stroke lastStroke = strokes.get(strokes.size() - 1);
 								lastStroke.setMax(shape.getMax());
 								lastStroke.setEndDate(shape.getDate());
-								lastStroke.update(code, type);//=================
+								lastStroke.update(code, type);// =================
 							}
 						}
 					} else {
@@ -457,9 +478,9 @@ public class BaseController extends Controller {
 									gapStroke.setEndDate(shape.getDate());
 									gapStroke.setDirection("0");
 									gapStroke.setPrevId(lastStroke.getId());
-									gapStroke.save(code, type);//=================
+									gapStroke.save(code, type);// =================
 									lastStroke.setNextId(gapStroke.getId());
-									lastStroke.update(code, type);//=================
+									lastStroke.update(code, type);// =================
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
@@ -486,9 +507,9 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);//===========
+							stroke.save(code, type);// ===========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);//=================
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);// =================
 							}
 							strokes.add(stroke);
 							index = i + 1;
@@ -517,7 +538,7 @@ public class BaseController extends Controller {
 								Stroke lastStroke = strokes.get(strokes.size() - 1);
 								lastStroke.setMin(shape.getMin());
 								lastStroke.setEndDate(shape.getDate());
-								lastStroke.update(code, type);//=================
+								lastStroke.update(code, type);// =================
 							}
 						}
 					} else {
@@ -538,9 +559,9 @@ public class BaseController extends Controller {
 									gapStroke.setEndDate(shape.getDate());
 									gapStroke.setDirection("1");
 									gapStroke.setPrevId(lastStroke.getId());
-									gapStroke.save(code, type);//============
+									gapStroke.save(code, type);// ============
 									lastStroke.setNextId(gapStroke.getId());
-									lastStroke.update(code, type);//=================
+									lastStroke.update(code, type);// =================
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
@@ -567,9 +588,9 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);//==========
+							stroke.save(code, type);// ==========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);//=================
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);// =================
 							}
 							strokes.add(stroke);
 							index = i + 1;

@@ -44,6 +44,24 @@ public abstract class BaseKline<T extends BaseKline> extends SuperModel<T> imple
 		return getDouble("min");
 	}
 
+	public T setOpen(java.lang.Double open) {
+		set("open", open);
+		return (T)this;
+	}
+	
+	public java.lang.Double getOpen() {
+		return getDouble("open");
+	}
+
+	public T setClose(java.lang.Double close) {
+		set("close", close);
+		return (T)this;
+	}
+	
+	public java.lang.Double getClose() {
+		return getDouble("close");
+	}
+
 	public T setCurrencyId(java.lang.Integer currencyId) {
 		set("currencyId", currencyId);
 		return (T)this;
@@ -69,6 +87,51 @@ public abstract class BaseKline<T extends BaseKline> extends SuperModel<T> imple
 	
 	public java.lang.String getType() {
 		return getStr("type");
+	}
+
+	public T setBar(java.lang.Double bar) {
+		set("bar", bar);
+		return (T)this;
+	}
+	
+	public java.lang.Double getBar() {
+		return getDouble("bar");
+	}
+
+	public T setEmaS(java.lang.Double emaS) {
+		set("ema_s", emaS);
+		return (T)this;
+	}
+	
+	public java.lang.Double getEmaS() {
+		return getDouble("ema_s");
+	}
+
+	public T setEmaL(java.lang.Double emaL) {
+		set("ema_l", emaL);
+		return (T)this;
+	}
+	
+	public java.lang.Double getEmaL() {
+		return getDouble("ema_l");
+	}
+
+	public T setDiff(java.lang.Double diff) {
+		set("diff", diff);
+		return (T)this;
+	}
+	
+	public java.lang.Double getDiff() {
+		return getDouble("diff");
+	}
+
+	public T setDea(java.lang.Double dea) {
+		set("dea", dea);
+		return (T)this;
+	}
+	
+	public java.lang.Double getDea() {
+		return getDouble("dea");
 	}
 
 }

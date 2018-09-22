@@ -2,6 +2,7 @@ package com.liberty.system.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,8 @@ import com.liberty.system.model.Kline;
 import com.liberty.system.service.DownLoader;
 
 public class XlDownLoader implements DownLoader {
+	// private String sina_url="https://ex.sina.com.cn/";
+	private String sina_url = "https://vip.stock.finance.sina.com.cn/";
 	private static final Map<String, String> klineTypeNumberMap;
 	private static final Map<String, String> paramTypeMap;
 	private static final Map<String, Integer> klineTypeBetweenMap;
@@ -54,14 +57,14 @@ public class XlDownLoader implements DownLoader {
 		String url = "";
 		Date now = new Date();
 		if ("7".equals(type)) {// 日线
-			url = "https://ex.sina.com.cn/forex/api/jsonp.php/var_fx_s" + code.toLowerCase()
-					+ "2018_7_17=/NewForexService.getDayKLine";
+			url = sina_url + "forex/api/jsonp.php/var_fx_s" + code.toLowerCase()
+					+ new SimpleDateFormat("yyyy_MM_dd").format(now) + "=/NewForexService.getDayKLine";
 			params.put("symbol", "fx_s" + code.toLowerCase());
 			params.put("_", new SimpleDateFormat("yyyy_MM_dd").format(now));
 			try {
 				response = HTTPUtils.http(url, params, "get");
 				response = response.substring(response.indexOf("String(\"") + 8);
-				response = response.substring(0, response.lastIndexOf("\"") + 1);
+				response = response.substring(0, response.lastIndexOf("\""));
 
 				String[] dataArray = response.split("\\|");
 				for (String data : dataArray) {
@@ -70,21 +73,24 @@ public class XlDownLoader implements DownLoader {
 					kline.setDate(DateUtil.strDate(perData[0], "yyyy-MM-dd"));
 					kline.setMax(Double.valueOf(perData[3]));
 					kline.setMin(Double.valueOf(perData[2]));
+					kline.setOpen(Double.valueOf(perData[1]));
+					kline.setClose(Double.valueOf(perData[4]));
 					if (DateUtil.getNumberBetween(kline.getDate(), now, klineTypeBetweenMap.get("7")) < Long
 							.valueOf(klineTypeNumberMap.get("7"))) {
 						klineList.add(kline);
 					}
 				}
 			} catch (Exception e) {
-				return null;
+				e.printStackTrace();
+				System.exit(0);
 			}
 
 		} else {// 分钟线
 			if (paramTypeMap.get(type) == null) {
 				return null;// 没有该级别K线的数据
 			}
-			url = "https://ex.sina.com.cn/forex/api/jsonp.php/var_fx_s" + code.toLowerCase() + "_" + type + "_"
-					+ now.getTime() + "=/NewForexService.getMinKline";
+			url = sina_url + "forex/api/jsonp.php/var_fx_s" + code.toLowerCase() + "_" + type + "_" + now.getTime()
+					+ "=/NewForexService.getMinKline";
 			params.put("symbol", "fx_s" + code.toLowerCase());
 			params.put("scale", paramTypeMap.get(type));
 			if (lastKline == null) {
@@ -108,6 +114,10 @@ public class XlDownLoader implements DownLoader {
 							? map.get("h").toString().replaceAll(",", "") : map.get("h").toString()));
 					kline.setMin(Double.valueOf(map.get("l").toString().contains(",")
 							? map.get("l").toString().replaceAll(",", "") : map.get("l").toString()));
+					kline.setOpen(Double.valueOf(map.get("o").toString().contains(",")
+							? map.get("o").toString().replaceAll(",", "") : map.get("o").toString()));
+					kline.setMin(Double.valueOf(map.get("c").toString().contains(",")
+							? map.get("c").toString().replaceAll(",", "") : map.get("c").toString()));
 					kline.setDate(DateUtil.strDate(map.get("d").toString(), "yyyy-MM-dd HH:mm:ss"));
 					klineList.add(kline);
 				}

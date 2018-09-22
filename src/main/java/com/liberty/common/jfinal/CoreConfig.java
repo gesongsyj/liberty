@@ -16,6 +16,7 @@ import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
 import com.liberty.common.interceptor.CoreInterceptor;
 import com.liberty.common.jfinal._MappingKit;
+import com.liberty.system.web.KlineController;
 
 import cn.dreampie.quartz.QuartzPlugin;
 import net.dreamlu.event.EventPlugin;
@@ -91,8 +92,11 @@ public class CoreConfig extends JFinalConfig {
 
 	}
 
-	public static void main(String[] args) {
-		JFinal.start("src/main/webapp", 80, "/", 5);// 启动
+	@Override
+	public void afterJFinalStart() {
+		KlineController klineController = new KlineController();
+		klineController.downloadData();
+		klineController.createStroke();
 	}
 
 }

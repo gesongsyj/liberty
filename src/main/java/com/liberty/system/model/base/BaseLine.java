@@ -98,4 +98,13 @@ public abstract class BaseLine<T extends BaseLine> extends SuperModel<T> impleme
 		return getStr("type");
 	}
 
+	public T setDirection(java.lang.String direction) {
+		set("direction", direction);
+		return (T)this;
+	}
+	
+	public java.lang.String getDirection() {
+		return getStr("direction");
+	}
+
 }
