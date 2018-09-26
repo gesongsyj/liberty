@@ -58,12 +58,12 @@ public class HTTPUtils {
 		if (method.equalsIgnoreCase("GET")) {
 			if (params != null && params.size() != 0) {
 				url = url + "?";
+				for (String paramName : params.keySet()) {
+					String paramValue = params.get(paramName);
+					url = url + paramName + "=" + paramValue + "&";
+				}
+				url = url.substring(0, url.length() - 1);
 			}
-			for (String paramName : params.keySet()) {
-				String paramValue = params.get(paramName);
-				url = url + paramName + "=" + paramValue + "&";
-			}
-			url = url.substring(0, url.length() - 1);
 			try {
 				httpUrl = new URL(url);
 			} catch (MalformedURLException e) {
