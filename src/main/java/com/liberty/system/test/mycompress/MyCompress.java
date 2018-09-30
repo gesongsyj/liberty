@@ -47,6 +47,7 @@ public class MyCompress {
 		map.put("10", d3 / d);
 		map.put("11", d4 / d);
 		System.out.println(map);
+		
 	}
 
 }
