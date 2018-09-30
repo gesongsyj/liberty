@@ -44,4 +44,13 @@ public abstract class BaseCurrency<T extends BaseCurrency> extends SuperModel<T>
 		return get("followed");
 	}
 
+	public T setCurrencyType(java.lang.String currencyType) {
+		set("currencyType", currencyType);
+		return (T)this;
+	}
+	
+	public java.lang.String getCurrencyType() {
+		return getStr("currencyType");
+	}
+
 }

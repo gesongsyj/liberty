@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.service.DownLoader;
 
@@ -50,16 +51,16 @@ public class XlDownLoader implements DownLoader {
 	}
 
 	@Override
-	public List<Kline> downLoad(String code, String type, String method, Kline lastKline) {
+	public List<Kline> downLoad(Currency currency, String type, String method, Kline lastKline) {
 		Map<String, String> params = new HashMap<String, String>();
 		List<Kline> klineList = new ArrayList<Kline>();
 		String response = "";
 		String url = "";
 		Date now = new Date();
 		if ("7".equals(type)) {// 日线
-			url = sina_url + "forex/api/jsonp.php/var_fx_s" + code.toLowerCase()
+			url = sina_url + "forex/api/jsonp.php/var_fx_s" + currency.getCode().toLowerCase()
 					+ new SimpleDateFormat("yyyy_MM_dd").format(now) + "=/NewForexService.getDayKLine";
-			params.put("symbol", "fx_s" + code.toLowerCase());
+			params.put("symbol", "fx_s" + currency.getCode().toLowerCase());
 			params.put("_", new SimpleDateFormat("yyyy_MM_dd").format(now));
 			try {
 				response = HTTPUtils.http(url, params, "get");
@@ -89,9 +90,9 @@ public class XlDownLoader implements DownLoader {
 			if (paramTypeMap.get(type) == null) {
 				return null;// 没有该级别K线的数据
 			}
-			url = sina_url + "forex/api/jsonp.php/var_fx_s" + code.toLowerCase() + "_" + type + "_" + now.getTime()
+			url = sina_url + "forex/api/jsonp.php/var_fx_s" + currency.getCode().toLowerCase() + "_" + type + "_" + now.getTime()
 					+ "=/NewForexService.getMinKline";
-			params.put("symbol", "fx_s" + code.toLowerCase());
+			params.put("symbol", "fx_s" + currency.getCode().toLowerCase());
 			params.put("scale", paramTypeMap.get(type));
 			if (lastKline == null) {
 				params.put("datalen", klineTypeNumberMap.get(type) == null ? "1000" : klineTypeNumberMap.get(type));

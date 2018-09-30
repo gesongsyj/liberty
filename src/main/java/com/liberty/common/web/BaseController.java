@@ -398,24 +398,66 @@ public class BaseController extends Controller {
 
 	public List<Line> processLines(List<Stroke> strokes, Line line) {
 		Integer currencyId = strokes.get(0).getCurrencyId();
-		if(line!=null){
-			
-		}else{
+		if (line != null) {
+
+		} else {
 			for (int i = 0; i < strokes.size(); i++) {
-				if("0".equals(strokes.get(0).getDirection())){//第一笔向上
-					
+				if ("0".equals(strokes.get(0).getDirection())) {// 第一笔向上
+
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
-	public List<Line> loopProcessLines(List<Stroke> strokes,List<Line> lines){
-		
+
+	/**
+	 * 判断三笔是否重叠
+	 * 
+	 * @param s1
+	 * @param s2
+	 * @param s3
+	 * @return 0:重叠;1:不重叠:方向向上;2:不重叠:方向向下
+	 */
+	private int overlap(Stroke s1, Stroke s2, Stroke s3) {
+		if ("0".equals(s1.getDirection()) && "0".equals(s3.getDirection())) {
+			if (s1.getMin() > s3.getMax()) {
+				return 2;
+			}
+		}
+		if ("1".equals(s1.getDirection()) && "1".equals(s3.getDirection())) {
+			if (s1.getMax() < s3.getMin()) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	public List<Line> loopProcessLines(List<Stroke> strokes, Line lastLine) {
+		List<Line> lines = new ArrayList<Line>();
+		List<Shape> shapes = new ArrayList<Shape>();
+		List<Double> highPoints=new ArrayList<Double>();
+		List<Double> lowPoints=new ArrayList<Double>();
+		if (lastLine != null) {
+			Shape firstShape = new Shape().setDate(lastLine.getEndDate()).setType(lastLine.getDirection());
+			if ("0".equals(lastLine.getDirection())) {
+				firstShape.setMax(lastLine.getMax());
+			} else {
+				firstShape.setMin(lastLine.getMin());
+			}
+			shapes.add(firstShape);
+		}
+		for (int i = 0; i < strokes.size(); i++) {
+			if ("0".equals(strokes.get(i).getDirection())) {//第一笔向上
+				
+			}else{//第一笔向下
+				
+			}
+		}
+
 		return lines;
 	}
-	
+
 	public List<Stroke> processStrokes(List<Kline> klines, Stroke inStroke) {
 		int currencyId = klines.get(0).getCurrencyId();
 		String code = Currency.dao.findById(currencyId).getCode();
@@ -434,6 +476,7 @@ public class BaseController extends Controller {
 			} else if ("1".equals(inStroke.getDirection())) {
 				firstShape.setMin(inStroke.getMin());
 			}
+			shapes.add(firstShape);// ++++++++++
 		}
 
 		outterFor: for (int i = 0; i < klines.size() - 2; i++) {
@@ -478,6 +521,7 @@ public class BaseController extends Controller {
 									gapStroke.setEndDate(shape.getDate());
 									gapStroke.setDirection("0");
 									gapStroke.setPrevId(lastStroke.getId());
+									gapStroke.setFromGap(true);
 									gapStroke.save(code, type);// =================
 									lastStroke.setNextId(gapStroke.getId());
 									lastStroke.update(code, type);// =================
@@ -559,6 +603,7 @@ public class BaseController extends Controller {
 									gapStroke.setEndDate(shape.getDate());
 									gapStroke.setDirection("1");
 									gapStroke.setPrevId(lastStroke.getId());
+									gapStroke.setFromGap(true);
 									gapStroke.save(code, type);// ============
 									lastStroke.setNextId(gapStroke.getId());
 									lastStroke.update(code, type);// =================

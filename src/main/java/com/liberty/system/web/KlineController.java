@@ -24,6 +24,7 @@ import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
 import com.liberty.system.service.DownLoader;
 import com.liberty.system.service.impl.HxDownLoader;
+import com.liberty.system.service.impl.DfcfDownLoader;
 import com.liberty.system.service.impl.XlDownLoader;
 
 public class KlineController extends BaseController {
@@ -71,25 +72,26 @@ public class KlineController extends BaseController {
 	 */
 	@Before(Tx.class)
 	public void downloadData() {
-		DownLoader downLoader = new XlDownLoader();
+//		DownLoader downLoader = new XlDownLoader();
+		DownLoader downLoader = new DfcfDownLoader();
 		List<Currency> listAll = Currency.dao.listAll();
 
-		String sql = "select * from dictionary where type='klineType'";
+		String sql = "select * from dictionary where type='klineType_gp'";
 		List<Record> klineType = Db.find(sql);
 		Map<String, List<Kline>> klineMap = new HashMap<String, List<Kline>>();
 		Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 		for (Record record : klineType) {
 			// ================测试
-			if (!record.getStr("key").equals("7")) {
+			if (!record.getStr("key").equals("k")) {
 				continue;
 			}
 			// ================
 
 			for (Currency currency : listAll) {
 				// ===========测试,只取eurusd
-				if (!currency.getCode().equals("EURUSD")) {
-					continue;
-				}
+//				if (!currency.getCode().equals("600721")) {
+//					continue;
+//				}
 				// ===========
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
 				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
@@ -105,7 +107,7 @@ public class KlineController extends BaseController {
 					lastKlineMap.put(currency.getCode() + "_" + record.getStr("key"), lastKline);
 				}
 				List<Kline> klineList = null;
-				klineList = downLoader.downLoad(currency.getCode(), record.getStr("key"), "get", lastKline);
+				klineList = downLoader.downLoad(currency, record.getStr("key"), "get", lastKline);
 				if (klineList == null || klineList.size() == 0) {
 					continue;
 				}
@@ -139,7 +141,7 @@ public class KlineController extends BaseController {
 
 		if (lastStroke == null) {
 			// 查询所有的K线
-			List<Kline> klines = Kline.dao.listAllByCode("EURUSD", "7");
+			List<Kline> klines = Kline.dao.listAllByCode("600721", "k");
 			// 处理K线的包含关系
 			List<Kline> handleInclude = handleInclude(klines, lastStroke);
 			// 生成笔
@@ -147,7 +149,7 @@ public class KlineController extends BaseController {
 		} else {
 			// 查询最后一笔之后的K线
 			Date date = lastStroke.getEndDate();
-			List<Kline> klines = Kline.dao.getListByDate("EURUSD", "7", date);
+			List<Kline> klines = Kline.dao.getListByDate("600721", "k", date);
 			// 处理K线的包含关系
 			List<Kline> handleInclude = handleInclude(klines, lastStroke);
 			// 生成笔
@@ -159,37 +161,39 @@ public class KlineController extends BaseController {
 	@Before(Tx.class)
 	public void createLine() {
 		Line lastLine = Line.dao.getLast();
-		List<Stroke> removeStrokes=new ArrayList<Stroke>();
-		List<Line> storeLines=new ArrayList<Line>();
+		List<Line> storeLines=null;//生成的线段
+		List<Stroke> strokes=null;
 		if (lastLine == null) {
 			// 查询所有的笔
-			List<Stroke> strokes = Stroke.dao.listAllByCode("EURUSD", "7");
+			strokes = Stroke.dao.listAllByCode("600721", "k");
+			int size=strokes.size();
 			for (int i = 0; i < strokes.size() - 2; i++) {
 				if ("0".equals(strokes.get(i).getDirection())) {
 					if (strokes.get(i).getMax() < strokes.get(i + 2).getMax()
 							&& strokes.get(i).getMin() < strokes.get(i + 2).getMin()) {
-						removeStrokes.add(strokes.get(i));
-						break;
+						strokes.remove(i);
+						i--;
+						size=strokes.size();
+						continue;
 					}
 				}
 				if ("1".equals(strokes.get(i).getDirection())) {
 					if (strokes.get(i).getMax() > strokes.get(i + 2).getMax()
 							&& strokes.get(i).getMin() > strokes.get(i + 2).getMin()) {
-						removeStrokes.add(strokes.get(i));
-						break;
+						strokes.remove(i);
+						i--;
+						size=strokes.size();
+						continue;
 					}
 				}
-				continue;
+				break;
 			}
-			strokes.removeAll(removeStrokes);
-			loopProcessLines(strokes, storeLines);
-			
 		} else {
 			// 查询最后一条线段后的笔
 			Date date = lastLine.getEndDate();
-			List<Stroke> strokes = Stroke.dao.getListByDate("EURUSD", "7", date);
-
+			strokes = Stroke.dao.getListByDate("600721", "k", date);
 		}
+		loopProcessLines(strokes, lastLine);
 	}
 
 }

@@ -16,9 +16,23 @@ import com.liberty.system.query.StrokeQueryObject;
  */
 @SuppressWarnings("serial")
 public class Stroke extends BaseStroke<Stroke> {
+	private boolean fromGap;
+	
 	public static final Stroke dao = new Stroke().dao();
 	
 	private List<Kline> allKlines=new ArrayList<Kline>();
+	
+	/**
+	 * 是否是缺口成笔
+	 * @return
+	 */
+	public boolean isFromGap() {
+		return fromGap;
+	}
+	
+	public void setFromGap(boolean fromGap) {
+		this.fromGap = fromGap;
+	}
 	
 	public void updateKline(){
 		Db.batchUpdate(allKlines, allKlines.size());

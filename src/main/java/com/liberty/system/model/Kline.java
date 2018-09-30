@@ -26,6 +26,12 @@ public class Kline extends BaseKline<Kline> {
 		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
 	}
 
+	public Kline getLastOneByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
+		Kline kline = dao.findFirst(sqlPara);
+		return kline;
+	}
+	
 	public List<Kline> getLastByCode(String code, String type) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
 		List<Kline> list = dao.find(sqlPara);

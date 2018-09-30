@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.HttpException;
@@ -35,6 +36,8 @@ public class HTTPUtils {
 	private HttpClient client;
 
 	private static HTTPUtils instance = new HTTPUtils();
+	
+	private static Map<String, String> headers=new HashMap<String, String>();
 
 	/**
 	 * 私有化构造器
@@ -52,6 +55,42 @@ public class HTTPUtils {
 		client.getParams().setHttpElementCharset(UTF8);
 	}
 
+	public static String http(String url, Map<String, String> params, String method,Map<String, String> hs) {
+		headers.clear();
+		if(headers!=null){
+			headers=hs;
+		}
+		String response = "";
+		URL httpUrl = null;
+		if (method.equalsIgnoreCase("GET")) {
+			if (params != null && params.size() != 0) {
+				url = url + "?";
+				for (String paramName : params.keySet()) {
+					String paramValue = params.get(paramName);
+					url = url + paramName + "=" + paramValue + "&";
+				}
+				url = url.substring(0, url.length() - 1);
+			}
+			try {
+				httpUrl = new URL(url);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			response = get(httpUrl);
+		} else if (method.equalsIgnoreCase("POST")) {
+			String jsonString = JSON.toJSONString(params);
+			try {
+				httpUrl = new URL(url);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			response = post(httpUrl, jsonString);
+		}
+		return response;
+	}
+	
 	public static String http(String url, Map<String, String> params, String method) {
 		String response = "";
 		URL httpUrl = null;
@@ -99,6 +138,11 @@ public class HTTPUtils {
 			HttpMethod method = new GetMethod(url.toString());
 			// 中文转码
 			method.getParams().setContentCharset(UTF8);
+			if(!headers.isEmpty()){
+				for (String key : headers.keySet()) {
+					method.setRequestHeader(key, headers.get(key));
+				}
+			}
 			try {
 				client.executeMethod(method);
 			} catch (HttpException e) {
@@ -142,6 +186,11 @@ public class HTTPUtils {
 			PostMethod post = new PostMethod(url.toString());
 			RequestEntity requestEntity = new StringRequestEntity(content, "application/json;charse=UTF-8", UTF8);
 			post.setRequestEntity(requestEntity);
+			if(!headers.isEmpty()){
+				for (String key : headers.keySet()) {
+					post.setRequestHeader(key, headers.get(key));
+				}
+			}
 			// 设置格式
 			post.getParams().setContentCharset(UTF8);
 

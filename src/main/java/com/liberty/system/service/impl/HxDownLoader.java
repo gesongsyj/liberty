@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.service.DownLoader;
 
@@ -49,7 +50,7 @@ public class HxDownLoader implements DownLoader {
 	}
 
 	@Override
-	public List<Kline> downLoad(String code, String type, String method, Kline lastKline) {
+	public List<Kline> downLoad(Currency currency, String type, String method, Kline lastKline) {
 		Map<String, String> params = new HashMap<String, String>();
 		List<Kline> klineList = new ArrayList<Kline>();
 		String response = "";
@@ -61,7 +62,7 @@ public class HxDownLoader implements DownLoader {
 
 		params.put("start", tomorrowFormat + "080000");
 		params.put("type", paramTypeMap.get(type));// K线级别
-		params.put("code", "FOREX" + code);// 设置code参数
+		params.put("code", "FOREX" + currency.getCode());// 设置code参数
 		if (lastKline == null) {
 			if (paramTypeMap.get(type) == null) {
 				return null;// 没有该级别K线的数据

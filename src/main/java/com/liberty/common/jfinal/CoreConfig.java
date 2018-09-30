@@ -16,6 +16,7 @@ import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
 import com.liberty.common.interceptor.CoreInterceptor;
 import com.liberty.common.jfinal._MappingKit;
+import com.liberty.system.web.CurrencyController;
 import com.liberty.system.web.KlineController;
 
 import cn.dreampie.quartz.QuartzPlugin;
@@ -64,9 +65,9 @@ public class CoreConfig extends JFinalConfig {
 		_MappingKit.mapping(arp);
 
 		// 定时任务
-		QuartzPlugin quartz = new QuartzPlugin();
-		quartz.setJobs("job.properties");
-		me.add(quartz);
+//		QuartzPlugin quartz = new QuartzPlugin();
+//		quartz.setJobs("job.properties");
+//		me.add(quartz);
 
 		// 初始化事件插件
 		EventPlugin plugin = new EventPlugin();
@@ -94,6 +95,8 @@ public class CoreConfig extends JFinalConfig {
 
 	@Override
 	public void afterJFinalStart() {
+		CurrencyController currencyController = new CurrencyController();
+		currencyController.updateCurrency();
 		KlineController klineController = new KlineController();
 		klineController.downloadData();
 		klineController.createStroke();

@@ -8,6 +8,21 @@
 	#end
 #end
 
+#sql("getLastOneByCode")
+	select k.*
+	from kline k join currency c on k.currencyId=c.id
+	#set(flag=0)
+	#if(code)
+		#(flag==0?"where":"and") c.code=#para(code)
+		#set(flag=1)
+	#end
+	#if(type)
+		#(flag==0?"where":"and") k.type=#para(type)
+		#set(flag=1)
+	#end
+	order by k.date desc
+#end
+
 #sql("getLastByCode")
 	select k.*
 	from kline k join currency c on k.currencyId=c.id
