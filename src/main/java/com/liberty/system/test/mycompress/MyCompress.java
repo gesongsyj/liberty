@@ -15,37 +15,81 @@ public class MyCompress {
 				.getBytes();
 		List<String> ss = new ArrayList<>();
 		Map<String, Double> map = new HashMap<>();
-		double d1 = 0, d2 = 0, d3 = 0, d4 = 0;
+		double d1 = 0, d2 = 0, d3 = 0, d4 = 0,d5 = 0, d6 = 0, d7 = 0, d8 = 0,d9 = 0, d10 = 0, d11 = 0, d12 = 0,d13 = 0, d14 = 0, d15 = 0, d16 = 0;
 		for (byte c : bytes) {
 			String byte2bits = Util.byte2bits(c);
-			String s1 = byte2bits.substring(0, 2);
-			String s2 = byte2bits.substring(2, 4);
-			String s3 = byte2bits.substring(4, 6);
-			String s4 = byte2bits.substring(6, 8);
+			String s1 = byte2bits.substring(0, 4);
+			String s2 = byte2bits.substring(4, 8);
 			ss.add(s1);
 			ss.add(s2);
-			ss.add(s3);
-			ss.add(s4);
 		}
 		for (String string : ss) {
-			if ("00".equals(string)) {
+			if ("0000".equals(string)) {
 				d1++;
 			}
-			if ("01".equals(string)) {
+			if ("0001".equals(string)) {
 				d2++;
 			}
-			if ("10".equals(string)) {
+			if ("0010".equals(string)) {
 				d3++;
 			}
-			if ("11".equals(string)) {
+			if ("0011".equals(string)) {
 				d4++;
 			}
+			if ("0100".equals(string)) {
+				d5++;
+			}
+			if ("0101".equals(string)) {
+				d6++;
+			}
+			if ("0110".equals(string)) {
+				d7++;
+			}
+			if ("0111".equals(string)) {
+				d8++;
+			}
+			if ("1000".equals(string)) {
+				d9++;
+			}
+			if ("1001".equals(string)) {
+				d10++;
+			}
+			if ("1010".equals(string)) {
+				d11++;
+			}
+			if ("1011".equals(string)) {
+				d12++;
+			}
+			if ("1100".equals(string)) {
+				d13++;
+			}
+			if ("1101".equals(string)) {
+				d14++;
+			}
+			if ("1110".equals(string)) {
+				d15++;
+			}
+			if ("1111".equals(string)) {
+				d16++;
+			}
 		}
-		double d = d1 + d2 + d3 + d4;
-		map.put("00", d1 / d);
-		map.put("01", d2 / d);
-		map.put("10", d3 / d);
-		map.put("11", d4 / d);
+		double d = d1 + d2 + d3 + d4+d5+d6+d7+d8+d9+d10+d11+d12+d13+d14+d15+d16;
+		map.put("0000", d1 / d);
+		map.put("0001", d2 / d);
+		map.put("0010", d3 / d);
+		map.put("0011", d4 / d);
+		map.put("0100", d5 / d);
+		map.put("0101", d6 / d);
+		map.put("0110", d7 / d);
+		map.put("0111", d8 / d);
+		map.put("1000", d9 / d);
+		map.put("1001", d10 / d);
+		map.put("1010", d11 / d);
+		map.put("1011", d12 / d);
+		map.put("1100", d13 / d);
+		map.put("1101", d14 / d);
+		map.put("1110", d15 / d);
+		map.put("1111", d16 / d);
 		System.out.println(map);
 		
 	}

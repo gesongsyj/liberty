@@ -28,13 +28,14 @@ public class Queue<T> {
 		try {
 			while (length == elements.length) {
 				waitfullsize++;
-				System.err.println("队列已满,等待.......");
+				System.err.println("队列已满,等待.......线程名:"+Thread.currentThread().getName());
 				System.out.println("waitfullsize:" + waitfullsize);
 				notfull.await();// 执行await()方法后进入等待队列,执行signal()方法后回到同步队列,从这里继续往后执行
 				waitfullsize--;
-				System.out.println("waitfullsize:" + waitfullsize);
+				System.out.println("队列继续执行....线程名:"+Thread.currentThread().getName());
 			}
 			elements[addIndex] = object;
+			System.out.println("线程执行....线程名:"+Thread.currentThread().getName());
 			System.out.println("addIndex:" + addIndex);
 			if (addIndex++ == elements.length) {
 				addIndex = 0;
@@ -52,13 +53,14 @@ public class Queue<T> {
 		try {
 			while (0 == length) {
 				waitemptysize++;
-				System.out.println("队列为空,等待......");
+				System.out.println("队列为空,等待......线程名:"+Thread.currentThread().getName());
 				System.out.println("waitemptysize:" + waitemptysize);
 				notempty.await();// 执行await()方法后进入等待队列,执行signal()方法后回到同步队列,从这里继续往后执行
+				System.out.println("队列继续执行....线程名:"+Thread.currentThread().getName());
 				waitemptysize--;
-				System.out.println("waitemptysize:" + waitemptysize);
 			}
 			Object element = elements[removeIndex];
+			System.out.println("线程执行....线程名:"+Thread.currentThread().getName());
 			System.out.println("removeIndex:" + removeIndex);
 			if (removeIndex++ == elements.length) {
 				removeIndex = 0;
@@ -74,7 +76,7 @@ public class Queue<T> {
 	public static void main(String[] args) throws InterruptedException {
 		Vector<Thread> threads = new Vector<Thread>(100);
 		final Queue<Integer> queue = new Queue<Integer>(100);
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 10; i++) {
 			Thread ithread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -95,10 +97,11 @@ public class Queue<T> {
 
 				}
 			});
+			ithread.setName(String.valueOf(i));
 			threads.add(ithread);
 			ithread.start();
 		}
-		for (int i = 0; i < 50; i++) {
+		for (int i = 10; i < 20; i++) {
 			Thread ithread = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -110,6 +113,7 @@ public class Queue<T> {
 
 				}
 			});
+			ithread.setName(String.valueOf(i));
 			threads.add(ithread);
 			ithread.start();
 		}

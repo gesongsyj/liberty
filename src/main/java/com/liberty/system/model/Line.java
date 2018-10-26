@@ -18,20 +18,20 @@ import com.liberty.system.query.StrokeQueryObject;
 public class Line extends BaseLine<Line> {
 	public static final Line dao = new Line().dao();
 	
-	private List<Kline> allKlines=new ArrayList<Kline>();
+	private List<Stroke> allStrokes=new ArrayList<Stroke>();
 	
 	public void updateKline(){
-		Db.batchUpdate(allKlines, allKlines.size());
-		allKlines.clear();
+		Db.batchUpdate(allStrokes, allStrokes.size());
+		allStrokes.clear();
 	}
 	
-	public boolean update(String code,String type) {
+	public boolean update(int currencyId,String type) {
 		try {
 			super.update();
-			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
-			for (Kline kline : klines) {
-				kline.setStrokeId(this.getId());
-				allKlines.add(kline);
+			List<Stroke> strokes = Stroke.dao.getByDateRange(currencyId,type,this.getStartDate(),this.getEndDate());
+			for (Stroke stroke : strokes) {
+				stroke.setLineId(this.getId());
+				allStrokes.add(stroke);
 			}
 			return true;
 		} catch (Exception e) {
@@ -40,13 +40,13 @@ public class Line extends BaseLine<Line> {
 		}
 	}
 	
-	public boolean save(String code,String type){
+	public boolean save(int currencyId,String type){
 		try {
 			super.save();
-			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
-			for (Kline kline : klines) {
-				kline.setStrokeId(this.getId());
-				allKlines.add(kline);
+			List<Stroke> strokes = Stroke.dao.getByDateRange(currencyId,type,this.getStartDate(),this.getEndDate());
+			for (Stroke stroke : strokes) {
+				stroke.setLineId(this.getId());
+				allStrokes.add(stroke);
 			}
 			return true;
 		} catch (Exception e) {
@@ -63,6 +63,12 @@ public class Line extends BaseLine<Line> {
 	public Line getLast() {
 		String sql = getSqlFromTemplate();
 		Line line = dao.findFirst(sql);
+		return line;
+	}
+
+	public Line getLastByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
+		Line line = dao.findFirst(sqlPara);
 		return line;
 	}
 }

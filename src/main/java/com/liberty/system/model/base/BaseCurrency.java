@@ -53,4 +53,22 @@ public abstract class BaseCurrency<T extends BaseCurrency> extends SuperModel<T>
 		return getStr("currencyType");
 	}
 
+	public T setBuyPoint(java.lang.Boolean buyPoint) {
+		set("buyPoint", buyPoint);
+		return (T)this;
+	}
+	
+	public java.lang.Boolean getBuyPoint() {
+		return get("buyPoint");
+	}
+
+	public T setSalePoint(java.lang.Boolean salePoint) {
+		set("salePoint", salePoint);
+		return (T)this;
+	}
+	
+	public java.lang.Boolean getSalePoint() {
+		return get("salePoint");
+	}
+
 }

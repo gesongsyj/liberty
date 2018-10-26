@@ -100,6 +100,7 @@ public class CoreConfig extends JFinalConfig {
 		KlineController klineController = new KlineController();
 		klineController.downloadData();
 		klineController.createStroke();
+		klineController.createLine();
 	}
 
 }

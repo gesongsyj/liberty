@@ -19,5 +19,10 @@ public class Scoder {
 		System.out.println(getCode(8));
 		System.out.println(getCode(71));
 		System.out.println(getCode(72));
+		try {
+			int a=1/0;
+		} catch (Exception e) {
+			StackTraceElement[] stackTrace = e.getStackTrace();
+		}
 	}
 }

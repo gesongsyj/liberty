@@ -39,6 +39,7 @@ import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
 
 import io.jsonwebtoken.Claims;
+import sun.tools.jconsole.OutputViewer;
 
 public class BaseController extends Controller {
 
@@ -419,7 +420,7 @@ public class BaseController extends Controller {
 	 * @param s3
 	 * @return 0:重叠;1:不重叠:方向向上;2:不重叠:方向向下
 	 */
-	private int overlap(Stroke s1, Stroke s2, Stroke s3) {
+	protected int overlap(Stroke s1, Stroke s2, Stroke s3) {
 		if ("0".equals(s1.getDirection()) && "0".equals(s3.getDirection())) {
 			if (s1.getMin() > s3.getMax()) {
 				return 2;
@@ -433,34 +434,129 @@ public class BaseController extends Controller {
 		return 0;
 	}
 
-	public List<Line> loopProcessLines(List<Stroke> strokes, Line lastLine) {
+	public List<Line> loopProcessLines(List<Stroke> strokes, Double prenum) {
+		Integer currencyId = strokes.get(0).getCurrencyId();
+		String type = strokes.get(0).getType();
 		List<Line> lines = new ArrayList<Line>();
-		List<Shape> shapes = new ArrayList<Shape>();
-		List<Double> highPoints=new ArrayList<Double>();
-		List<Double> lowPoints=new ArrayList<Double>();
-		if (lastLine != null) {
-			Shape firstShape = new Shape().setDate(lastLine.getEndDate()).setType(lastLine.getDirection());
-			if ("0".equals(lastLine.getDirection())) {
-				firstShape.setMax(lastLine.getMax());
-			} else {
-				firstShape.setMin(lastLine.getMin());
-			}
-			shapes.add(firstShape);
-		}
-		for (int i = 0; i < strokes.size(); i++) {
-			if ("0".equals(strokes.get(i).getDirection())) {//第一笔向上
-				
-			}else{//第一笔向下
-				
-			}
-		}
+		int size = strokes.size();
+		double premax = strokes.get(1).getMax();// 前一个最大值
+		double premin = strokes.get(1).getMin();// 前一个最小值
+		outter: for (int i = 0; i < size; i++) {
+			if ("0".equals(strokes.get(i).getDirection())) {// 第一笔向上
+				if (prenum != null && strokes.get(i).getMax() < prenum) {// 线段破坏后的下一线段刚开始几笔的处理
+					i++;
+					continue;
+				}
+				if (strokes.get(i + 1).getMax() > premax) {
+					premax = strokes.get(i + 1).getMax();
+				}
+				if (strokes.get(i + 3).getMin() < premax) {// 笔破坏,由上转下
+					// 出现笔破坏,线段的startpoint就出现了
+					// 看破坏是否最终成立[不成立的唯一一种情况:后三笔不成段]
+					if (overlap(strokes.get(i + 3), strokes.get(i + 4), strokes.get(i + 5)) > 0) {
+						i = i + 1;
+						continue;
+					} else {// 笔破坏最终成立
+						// 笔破坏最终确立,即三笔成段,线段的endpoint就出现了
+						Line tmpLine = new Line();
+						tmpLine.setStartDate(strokes.get(0).getStartDate());
+						tmpLine.setEndDate(strokes.get(i + 2).getEndDate());
+						tmpLine.setMax(strokes.get(i + 2).getMax());
+						tmpLine.setMin(strokes.get(0).getMin());
+						tmpLine.save(currencyId,type);
+						lines.add(tmpLine);
+						List<Stroke> tmStrokes = strokes.subList(0, i + 3);
+						List<Line> tmpLines = loopProcessLines(tmStrokes, premax);
+						lines.addAll(tmpLines);
+						break;
+					}
+				} else {// 没有笔破坏,看是否出现线段破坏
+					for (int j = i + 3; j < size; j++) {
+						if (strokes.get(j).getMin() < premax) {// 线段破坏
+							Line tmpLine = new Line();
+							tmpLine.setStartDate(strokes.get(0).getStartDate());
+							tmpLine.setEndDate(strokes.get(i + 2).getEndDate());
+							tmpLine.setMax(strokes.get(i + 2).getMax());
+							tmpLine.setMin(strokes.get(0).getMin());
+							tmpLine.save();
+							lines.add(tmpLine);
+							List<Stroke> tmStrokes = strokes.subList(0, i + 3);
+							List<Line> tmpLines = loopProcessLines(tmStrokes, premax);
+							lines.addAll(tmpLines);
+							break outter;
+						}
+						if (strokes.get(j + 1).getMax() > strokes.get(i + 5).getMax()) {// 原趋势延续
+							premax = strokes.get(i + 2).getMax();
+							i = j - 2;
+							continue outter;
+						}
+						continue;
+					}
 
+				}
+			} else {// 第一笔向下
+				if (prenum != null && strokes.get(i).getMin() > prenum) {// 线段破坏后的下一线段刚开始几笔的处理
+					i++;
+					continue;
+				}
+				if (strokes.get(i + 1).getMin() < premin) {
+					premin = strokes.get(i + 1).getMin();
+				}
+				if (strokes.get(i + 3).getMax() > premin) {// 笔破坏,由下转上
+					// 出现笔破坏,线段的startpoint就出现了
+					// 看破坏是否最终成立[不成立的唯一一种情况:后三笔不成段]
+					if (overlap(strokes.get(i + 3), strokes.get(i + 4), strokes.get(i + 5)) > 0) {
+						i = i + 1;
+						continue;
+					} else {// 笔破坏最终成立
+						// 笔破坏最终确立,即三笔成段,线段的endpoint就出现了
+						Line tmpLine = new Line();
+						tmpLine.setStartDate(strokes.get(0).getStartDate());
+						tmpLine.setEndDate(strokes.get(i + 2).getEndDate());
+						tmpLine.setMax(strokes.get(0).getMax());
+						tmpLine.setMin(strokes.get(i + 2).getMin());
+						tmpLine.save();
+						lines.add(tmpLine);
+						List<Stroke> tmStrokes = strokes.subList(0, i + 3);
+						List<Line> tmpLines = loopProcessLines(tmStrokes, premin);
+						lines.addAll(tmpLines);
+						break;
+					}
+				} else {// 没有笔破坏,看是否出现线段破坏
+					for (int j = i + 3; j < size; j++) {
+						if (strokes.get(j).getMax() > premin) {// 线段破坏
+							Line tmpLine = new Line();
+							tmpLine.setStartDate(strokes.get(0).getStartDate());
+							tmpLine.setEndDate(strokes.get(i + 2).getEndDate());
+							tmpLine.setMax(strokes.get(0).getMax());
+							tmpLine.setMin(strokes.get(i + 2).getMin());
+							tmpLine.save();
+							lines.add(tmpLine);
+							List<Stroke> tmStrokes = strokes.subList(0, i + 3);
+							List<Line> tmpLines = loopProcessLines(tmStrokes, premin);
+							lines.addAll(tmpLines);
+							break outter;
+						}
+						if (strokes.get(j + 1).getMin() < strokes.get(i + 5).getMin()) {// 原趋势延续
+							premin = strokes.get(i + 2).getMin();
+							i = j - 2;
+							continue outter;
+						}
+						continue;
+					}
+
+				}
+			}
+		}
 		return lines;
 	}
 
 	public List<Stroke> processStrokes(List<Kline> klines, Stroke inStroke) {
 		int currencyId = klines.get(0).getCurrencyId();
-		String code = Currency.dao.findById(currencyId).getCode();
+		Currency currency = Currency.dao.findById(currencyId);
+		currency.setBuyPoint(false);
+		currency.setSalePoint(false);
+		String code = currency.getCode();
 		String type = klines.get(0).getType();
 		List<Stroke> strokes = new ArrayList<Stroke>();
 		List<Shape> shapes = new ArrayList<Shape>();
@@ -501,6 +597,11 @@ public class BaseController extends Controller {
 								lastStroke.setMax(shape.getMax());
 								lastStroke.setEndDate(shape.getDate());
 								lastStroke.update(code, type);// =================
+
+								// 设置卖点
+								if (i == klines.size() - 3) {
+									currency.setSalePoint(true);
+								}
 							}
 						}
 					} else {
@@ -528,6 +629,12 @@ public class BaseController extends Controller {
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
+
+									// 设置卖点
+									if (i == klines.size() - 3) {
+										currency.setSalePoint(true);
+									}
+
 								} else {
 									continue;
 								}
@@ -558,6 +665,11 @@ public class BaseController extends Controller {
 							strokes.add(stroke);
 							index = i + 1;
 							strokeStartIndex = i + 1;
+
+							// 设置卖点
+							if (i == klines.size() - 3) {
+								currency.setSalePoint(true);
+							}
 						}
 					}
 
@@ -583,6 +695,11 @@ public class BaseController extends Controller {
 								lastStroke.setMin(shape.getMin());
 								lastStroke.setEndDate(shape.getDate());
 								lastStroke.update(code, type);// =================
+
+								// 设置买点
+								if (i == klines.size() - 3) {
+									currency.setBuyPoint(true);
+								}
 							}
 						}
 					} else {
@@ -610,6 +727,11 @@ public class BaseController extends Controller {
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
+
+									// 设置买点
+									if (i == klines.size() - 3) {
+										currency.setBuyPoint(true);
+									}
 								} else {
 									continue;
 								}
@@ -640,12 +762,18 @@ public class BaseController extends Controller {
 							strokes.add(stroke);
 							index = i + 1;
 							strokeStartIndex = i + 1;
+
+							// 设置买点
+							if (i == klines.size() - 3) {
+								currency.setBuyPoint(true);
+							}
 						}
 					}
 				}
 			}
 		}
 		Stroke.dao.updateKline();
+		currency.update();
 		return strokes;
 	}
 }

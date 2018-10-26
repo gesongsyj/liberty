@@ -74,9 +74,9 @@ public class Stroke extends BaseStroke<Stroke> {
 		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
 	}
 	
-	public Stroke getLast() {
-		String sql = getSqlFromTemplate();
-		Stroke stroke = dao.findFirst(sql);
+	public Stroke getLastByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
+		Stroke stroke = dao.findFirst(sqlPara);
 		return stroke;
 	}
 	
@@ -88,6 +88,13 @@ public class Stroke extends BaseStroke<Stroke> {
 	
 	public List<Stroke> getListByDate(String code, String type, Date date) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type).set("date", date));
+		List<Stroke> list = dao.find(sqlPara);
+		return list;
+	}
+	
+	public List<Stroke> getByDateRange(int currencyId, String type, Date startDate, Date endDate) {
+		SqlPara sqlPara = getSqlParaFromTemplate(
+				Kv.by("currencyId", currencyId).set("type", type).set("startDate", startDate).set("endDate", endDate));
 		List<Stroke> list = dao.find(sqlPara);
 		return list;
 	}
