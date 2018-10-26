@@ -158,31 +158,30 @@ public class KlineController extends BaseController {
 
 	@Before(Tx.class)
 	public void createLine() {
-		List<Currency> listAll = Currency.dao.listAll();
-		for (Currency currency : listAll) {
-			Line lastLine = Line.dao.getLastByCode(currency.getCode(),"k");
-		}
-		
-		Line lastLine = Line.dao.getLast();
 		List<Line> storeLines=null;//生成的线段
 		List<Stroke> strokes=null;
 		List<Stroke> subList=null;
-		if (lastLine == null) {
-			// 查询所有的笔
-			strokes = Stroke.dao.listAllByCode("600687", "k");
-			for (int i = 0; i < strokes.size() - 2; i++) {
-				if(overlap(strokes.get(i), strokes.get(i), strokes.get(i))>0){
+		
+		List<Currency> listAll = Currency.dao.listAll();
+		for (Currency currency : listAll) {
+			Line lastLine = Line.dao.getLastByCode(currency.getCode(),"k");
+			
+			if (lastLine == null) {
+				// 查询所有的笔
+				strokes = Stroke.dao.listAllByCode(currency.getCode(), "k");
+				if(strokes==null) {
 					continue;
 				}
-				subList = strokes.subList(0, i);
-				break;
+				
+
+			} else {
+				// 查询最后一条线段后的笔
+				Date date = lastLine.getEndDate();
+				strokes = Stroke.dao.getListByDate("600721", "k", date);
 			}
-		} else {
-			// 查询最后一条线段后的笔
-			Date date = lastLine.getEndDate();
-			strokes = Stroke.dao.getListByDate("600721", "k", date);
+			storeLines = loopProcessLines(subList,null);
 		}
-		storeLines = loopProcessLines(subList,null);
+		
 	}
 
 }
