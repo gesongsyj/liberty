@@ -187,7 +187,7 @@ public class KlineController extends BaseController {
 					continue;
 				}
 			}
-			loopProcessLines(subList,null,storeLines);
+			loopProcessLines2(subList,null,storeLines);
 		}
 		
 	}
