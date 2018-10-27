@@ -16,7 +16,7 @@
 
 #sql("getLastByCode")
 	select l.*
-	from line l join currency c on s.currencyId=c.id
+	from line l join currency c on l.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code = #para(code)

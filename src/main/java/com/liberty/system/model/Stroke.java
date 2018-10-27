@@ -35,7 +35,7 @@ public class Stroke extends BaseStroke<Stroke> {
 	}
 	
 	public void updateKline(){
-		Db.batchUpdate(allKlines, allKlines.size());
+		Db.batchUpdate(allKlines, 5000);
 		allKlines.clear();
 	}
 	

@@ -132,7 +132,7 @@ public class KlineController extends BaseController {
 			if (lastStroke == null) {
 				// 查询所有的K线
 				List<Kline> klines = Kline.dao.listAllByCode(currency.getCode(), "k");
-				if(klines==null) {
+				if(klines==null || klines.size()==0) {
 					continue;
 				}
 				// 处理K线的包含关系
@@ -143,7 +143,7 @@ public class KlineController extends BaseController {
 				// 查询最后一笔之后的K线
 				Date date = lastStroke.getEndDate();
 				List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", date);
-				if(klines==null) {
+				if(klines==null|| klines.size()==0) {
 					continue;
 				}
 				// 处理K线的包含关系
@@ -158,7 +158,7 @@ public class KlineController extends BaseController {
 
 	@Before(Tx.class)
 	public void createLine() {
-		List<Line> storeLines=null;//生成的线段
+		List<Line> storeLines=new ArrayList<Line>();//生成的线段
 		List<Stroke> strokes=null;
 		List<Stroke> subList=null;
 		
@@ -169,17 +169,25 @@ public class KlineController extends BaseController {
 			if (lastLine == null) {
 				// 查询所有的笔
 				strokes = Stroke.dao.listAllByCode(currency.getCode(), "k");
-				if(strokes==null) {
+				if(strokes==null|| strokes.size()==0) {
 					continue;
 				}
-				
-
+				for (int i = 0; i < strokes.size(); i++) {
+					if(overlap(strokes.get(i), strokes.get(i+1), strokes.get(i+2))>0) {
+						continue;
+					}
+					subList = strokes.subList(i, strokes.size());
+					break;
+				}
 			} else {
 				// 查询最后一条线段后的笔
 				Date date = lastLine.getEndDate();
-				strokes = Stroke.dao.getListByDate("600721", "k", date);
+				subList = Stroke.dao.getListByDate("600721", "k", date);
+				if(strokes==null|| strokes.size()==0) {
+					continue;
+				}
 			}
-			storeLines = loopProcessLines(subList,null);
+			loopProcessLines(subList,null,storeLines);
 		}
 		
 	}

@@ -35,7 +35,7 @@
 		#(flag==0?"where":"and") s.type = #para(type)
 		#set(flag=1)
 	#end
-	order by date asc
+	order by startDate asc
 #end
 
 #sql("getListByDate")
@@ -54,7 +54,7 @@
 		#(flag==0?"where":"and") s.type = #para(type)
 		#set(flag=1)
 	#end
-	order by date asc
+	order by startDate asc
 #end
 
 #sql("getByDateRange")
@@ -77,5 +77,5 @@
 		#(flag==0?"where":"and") s.type = #para(type)
 		#set(flag=1)
 	#end
-	order by date asc
+	order by startDate asc
 #end

@@ -20,8 +20,8 @@ public class Line extends BaseLine<Line> {
 	
 	private List<Stroke> allStrokes=new ArrayList<Stroke>();
 	
-	public void updateKline(){
-		Db.batchUpdate(allStrokes, allStrokes.size());
+	public void updateStroke(){
+		Db.batchUpdate(allStrokes, 5000);
 		allStrokes.clear();
 	}
 	
@@ -42,6 +42,8 @@ public class Line extends BaseLine<Line> {
 	
 	public boolean save(int currencyId,String type){
 		try {
+			this.setCurrencyId(currencyId);
+			this.setType(type);
 			super.save();
 			List<Stroke> strokes = Stroke.dao.getByDateRange(currencyId,type,this.getStartDate(),this.getEndDate());
 			for (Stroke stroke : strokes) {

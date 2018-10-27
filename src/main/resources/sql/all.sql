@@ -7,3 +7,6 @@
 #namespace("currency")
 	#include("currency.sql")
 #end
+#namespace("line")
+	#include("line.sql")
+#end
