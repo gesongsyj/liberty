@@ -672,7 +672,7 @@ public class BaseController extends Controller {
 							List<Stroke> subList = strokes.subList(j+2, strokes.size());
 							loopProcessLines3(subList, lines);
 						}
-						break;
+						break outter;
 					}
 					j++;
 				}
