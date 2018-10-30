@@ -25,6 +25,14 @@ public class Line extends BaseLine<Line> {
 		allStrokes.clear();
 	}
 	
+	public boolean saveOrUpdate(int currencyId,String type) {
+		if(this.getId()!=null) {
+			return update(currencyId,type);
+		}else {
+			return save(currencyId, type);
+		}
+	}
+	
 	public boolean update(int currencyId,String type) {
 		try {
 			super.update();

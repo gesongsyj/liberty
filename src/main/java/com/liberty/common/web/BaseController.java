@@ -423,143 +423,262 @@ public class BaseController extends Controller {
 		Integer currencyId = strokes.get(0).getCurrencyId();
 		String type = strokes.get(0).getType();
 		int size = strokes.size();
-
-		double premax = strokes.get(1).getMax();
-		double premin = strokes.get(1).getMin();
-		for (int j = 0; j < size; j++) {
-			if ("0".equals(strokes.get(j).getDirection())) {
-				if (strokes.get(j).getMax() > premax && strokes.get(j + 1).getMax() > strokes.get(j + 2).getMax()) {
-					// 找到临界点[顶]
-					if (strokes.get(j + 2).getMax() > premax
-							&& strokes.get(j + 2).getMax() > strokes.get(j + 4).getMax()) {
-						// 1:笔破坏
-						if (strokes.get(j + 3).getMin() < premax) {
-							// 笔破坏最终确认
-							if (overlap(strokes.get(j + 3), strokes.get(j + 4), strokes.get(j + 5)) > 0) {
-								Line tmpLine = new Line();
-								tmpLine.setStartDate(strokes.get(j-2).getStartDate());
-								tmpLine.setEndDate(strokes.get(j ).getEndDate());
-								tmpLine.setMax(strokes.get(j ).getMax());
-								tmpLine.setMin(strokes.get(j-2).getMin());
-								tmpLine.setDirection("0");
-								if (lines.size() != 0) {
-									Line lastLine = lines.get(lines.size() - 1);
-									if ("0".equals(lastLine.getDirection())) {// 跟前一线段同向
-										if (lastLine.getMax() > tmpLine.getMax()) {
-											i = j + 3 - 1;
-											continue outter;
-										} else {
-											lastLine.setEndDate(strokes.get(j + 2).getEndDate());
-											lastLine.setMax(strokes.get(j + 2).getMax());
-										}
-									} else {
-										tmpLine.setPrevId(lastLine.getId());
-										tmpLine.save(currencyId, type);
-										lastLine.setNextId(tmpLine.getId());
-										lastLine.update(currencyId, type);
-									}
-								} else {
-									tmpLine.save(currencyId, type);
-								}
-								lines.add(tmpLine);
-								List<Stroke> tmStrokes = strokes.subList(i + 3, strokes.size());
-								loopProcessLines(tmStrokes, premax, lines);
-								break outter;
-							}
-						}
-						// 2:线段破坏
-					}
+		double premax,premin;
+		if(lines.size()!=0) {
+			premax = strokes.get(0).getMax();
+			premin = strokes.get(0).getMin();
+		}else {
+			premax = strokes.get(1).getMax();
+			premin = strokes.get(1).getMin();
+		}
+		outter:
+		for (int i = 0; i < size-3; i++) {
+			
+			//重新设置前最大最小值
+			if(strokes.get(i+2).getMax()>strokes.get(i).getMax()&& "0".equals(strokes.get(i).getDirection())) {
+				if (strokes.get(i).getMax() > premax ) {
+					premax = strokes.get(i).getMax();
 				}
-			} else {
-				if (strokes.get(i).getMin() < premin && strokes.get(i + 1).getMin() < strokes.get(i + 2).getMin()) {
-					// 找到临界点[底]
+			}
+			if(strokes.get(i+2).getMin()<strokes.get(i+2).getMin() && "1".equals(strokes.get(i).getDirection())) {
+				if (strokes.get(i).getMin() < premin ) {
+					premin = strokes.get(i).getMin();
+				}
+			}
+			
+			// 找到分界点[顶]
+			if (strokes.get(i).getMax() > premax && strokes.get(i).getMax() > strokes.get(i + 2).getMax()
+					&& "0".equals(strokes.get(i).getDirection())) {
+				//1:笔破坏
+				if(strokes.get(i+1).getMin()<premax) {
+					//笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
+					Line tmpLine = new Line();
+					tmpLine.setEndDate(strokes.get(i).getEndDate());
+					tmpLine.setMax(strokes.get(i).getMax());
+					tmpLine.setDirection("0");
+					
+					if (lines.size() != 0) {
+						Line preLine = lines.get(lines.size() - 1);
+						//与前线段同向
+						if(tmpLine.getDirection().equals(preLine.getDirection())) {
+							preLine.setEndDate(tmpLine.getEndDate());
+							preLine.setMax(tmpLine.getMax());
+						}else {
+							tmpLine.setStartDate(preLine.getEndDate());
+							tmpLine.setMin(preLine.getMin());
+							preLine.saveOrUpdate(currencyId, type);
+							tmpLine.setPrevId(preLine.getId());
+							tmpLine.saveOrUpdate(currencyId, type);
+							preLine.setNextId(tmpLine.getId());
+							preLine.saveOrUpdate(currencyId, type);
+							lines.add(tmpLine);
+						}
+					} else {
+						tmpLine.setStartDate(strokes.get(0).getStartDate());
+						tmpLine.setMin(strokes.get(0).getMin());//
+						tmpLine.setEndDate(strokes.get(i).getEndDate());
+						tmpLine.setMax(strokes.get(i).getMax());
+						tmpLine.saveOrUpdate(currencyId, type);
+						lines.add(tmpLine);
+					}
+					Line preLine = lines.get(lines.size() - 1);
+					Line tmpLine2 = new Line();
+					tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
+					tmpLine2.setMax(strokes.get(i+1).getMax());
+					tmpLine2.setEndDate(strokes.get(i+3).getEndDate());
+					tmpLine2.setMin(strokes.get(i+3).getMin());
+					tmpLine2.setDirection("1");
+					tmpLine2.setPrevId(preLine.getId());
+					tmpLine2.saveOrUpdate(currencyId, type);
+					preLine.setNextId(tmpLine2.getId());
+					preLine.saveOrUpdate(currencyId, type);
+					lines.add(tmpLine2);
+					if(strokes.size()>i+3) {
+						List<Stroke> subList = strokes.subList(i+4, strokes.size());
+						loopProcessLines3(subList, lines);
+					}
+					break;
+				}
+				//2:线段破坏
+				for (int j = i+1; j < size-1; j++) {
+					if(strokes.get(j).getMin()<premax) {
+						//线段破坏成立
+						Line tmpLine = new Line();
+						tmpLine.setEndDate(strokes.get(i).getEndDate());
+						tmpLine.setMax(strokes.get(i).getMax());
+						tmpLine.setDirection("0");
+						if (lines.size() != 0) {
+							Line preLine = lines.get(lines.size() - 1);
+							//与前线段同向
+							if(tmpLine.getDirection().equals(preLine.getDirection())) {
+								preLine.setEndDate(tmpLine.getEndDate());
+								preLine.setMax(tmpLine.getMax());
+							}else {
+								tmpLine.setStartDate(preLine.getStartDate());
+								tmpLine.setMin(preLine.getMin());
+								preLine.saveOrUpdate(currencyId, type);
+								tmpLine.setPrevId(preLine.getId());
+								tmpLine.saveOrUpdate(currencyId, type);
+								preLine.setNextId(tmpLine.getId());
+								preLine.saveOrUpdate(currencyId, type);
+								lines.add(tmpLine);
+							}
+						} else {
+							tmpLine.setStartDate(strokes.get(0).getStartDate());
+							tmpLine.setMin(strokes.get(0).getMin());
+							tmpLine.saveOrUpdate(currencyId, type);
+							lines.add(tmpLine);
+						}
+						Line preLine = lines.get(lines.size() - 1);
+						Line tmpLine2 = new Line();
+						tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
+						tmpLine2.setMax(strokes.get(i+1).getMax());
+						tmpLine2.setEndDate(strokes.get(j).getEndDate());
+						tmpLine2.setMin(strokes.get(j).getMin());
+						tmpLine2.setDirection("1");
+						tmpLine2.setPrevId(preLine.getId());
+						tmpLine2.saveOrUpdate(currencyId, type);
+						preLine.setNextId(tmpLine2.getId());
+						preLine.saveOrUpdate(currencyId, type);
+						lines.add(tmpLine2);
+						
+						if(strokes.size()>j) {
+							List<Stroke> subList = strokes.subList(j+1, strokes.size());
+							loopProcessLines3(subList, lines);
+						}
+						break outter;
+					}
+					if(strokes.get(j+1).getMax()>strokes.get(i).getMax()) {
+						Line preLine = lines.get(lines.size() - 1);
+						preLine.setEndDate(strokes.get(j+1).getEndDate());
+						preLine.setMax(strokes.get(j+1).getMax());
+						if(strokes.size()>j+1) {
+							List<Stroke> subList = strokes.subList(j+2, strokes.size());
+							loopProcessLines3(subList, lines);
+						}
+						break outter;
+					}
+					j++;
+				}
+			}
+			// 找到分解点[底]
+			if (strokes.get(i).getMin() < premin && strokes.get(i).getMin() < strokes.get(i + 2).getMin()
+					&& "1".equals(strokes.get(i).getDirection())) {
+				//1:笔破坏
+				if(strokes.get(i+1).getMax()>premin) {
+					//笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
+					Line tmpLine = new Line();
+					tmpLine.setEndDate(strokes.get(i).getEndDate());
+					tmpLine.setMin(strokes.get(i).getMin());
+					tmpLine.setDirection("1");
+					
+					if (lines.size() != 0) {
+						Line preLine = lines.get(lines.size() - 1);
+						//与前线段同向
+						if(tmpLine.getDirection().equals(preLine.getDirection())) {
+							preLine.setEndDate(tmpLine.getEndDate());
+							preLine.setMin(tmpLine.getMin());
+						}else {
+							tmpLine.setStartDate(preLine.getEndDate());
+							tmpLine.setMax(preLine.getMax());
+							preLine.saveOrUpdate(currencyId, type);
+							tmpLine.setPrevId(preLine.getId());
+							tmpLine.saveOrUpdate(currencyId, type);
+							preLine.setNextId(tmpLine.getId());
+							preLine.saveOrUpdate(currencyId, type);
+							lines.add(tmpLine);
+						}
+					} else {
+						tmpLine.setStartDate(strokes.get(0).getStartDate());
+						tmpLine.setMax(strokes.get(0).getMax());
+						tmpLine.setEndDate(strokes.get(i).getEndDate());
+						tmpLine.setMin(strokes.get(i).getMin());
+						tmpLine.saveOrUpdate(currencyId, type);
+						lines.add(tmpLine);
+					}
+					Line preLine = lines.get(lines.size() - 1);
+					Line tmpLine2 = new Line();
+					tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
+					tmpLine2.setMax(strokes.get(i+1).getMax());
+					tmpLine2.setEndDate(strokes.get(i+3).getEndDate());
+					tmpLine2.setMin(strokes.get(i+3).getMin());
+					tmpLine2.setDirection("0");
+					tmpLine2.setPrevId(preLine.getId());
+					tmpLine2.saveOrUpdate(currencyId, type);
+					preLine.setNextId(tmpLine2.getId());
+					preLine.saveOrUpdate(currencyId, type);
+					lines.add(tmpLine2);
+					
+					if(strokes.size()>i+3) {
+						List<Stroke> subList = strokes.subList(i+4, strokes.size());
+						loopProcessLines3(subList, lines);
+					}
+					break;
+				}
+				//2:线段破坏
+				for (int j = i+1; j < size-1; j++) {
+					if(strokes.get(j).getMax()>premin) {
+						//线段破坏成立
+						Line tmpLine = new Line();
+						tmpLine.setEndDate(strokes.get(i).getEndDate());
+						tmpLine.setMin(strokes.get(i).getMin());
+						tmpLine.setDirection("1");
+						if (lines.size() != 0) {
+							Line preLine = lines.get(lines.size() - 1);
+							//与前线段同向
+							if(tmpLine.getDirection().equals(preLine.getDirection())) {
+								preLine.setEndDate(tmpLine.getEndDate());
+								preLine.setMin(tmpLine.getMin());
+							}else {
+								tmpLine.setStartDate(preLine.getStartDate());
+								tmpLine.setMax(preLine.getMax());
+								preLine.saveOrUpdate(currencyId, type);
+								tmpLine.setPrevId(preLine.getId());
+								tmpLine.saveOrUpdate(currencyId, type);
+								preLine.setNextId(tmpLine.getId());
+								preLine.saveOrUpdate(currencyId, type);
+								lines.add(tmpLine);
+							}
+						} else {
+							tmpLine.setStartDate(strokes.get(0).getStartDate());
+							tmpLine.setMax(strokes.get(0).getMax());
+							tmpLine.saveOrUpdate(currencyId, type);
+							lines.add(tmpLine);
+						}
+						Line preLine = lines.get(lines.size() - 1);
+						Line tmpLine2 = new Line();
+						tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
+						tmpLine2.setMin(strokes.get(i+1).getMin());
+						tmpLine2.setEndDate(strokes.get(j).getEndDate());
+						tmpLine2.setMax(strokes.get(j).getMax());
+						tmpLine2.setDirection("0");
+						tmpLine2.setPrevId(preLine.getId());
+						tmpLine2.saveOrUpdate(currencyId, type);
+						preLine.setNextId(tmpLine2.getId());
+						preLine.saveOrUpdate(currencyId, type);
+						lines.add(tmpLine2);
+						
+						if(strokes.size()>j) {
+							List<Stroke> subList = strokes.subList(j+1, strokes.size());
+							loopProcessLines3(subList, lines);
+						}
+						break outter;
+					}
+					if(strokes.get(j+1).getMin()<strokes.get(i).getMin()) {
+						Line preLine = lines.get(lines.size() - 1);
+						preLine.setEndDate(strokes.get(j+1).getEndDate());
+						preLine.setMin(strokes.get(j+1).getMin());
+						if(strokes.size()>j+1) {
+							List<Stroke> subList = strokes.subList(j+2, strokes.size());
+							loopProcessLines3(subList, lines);
+						}
+						break;
+					}
+					j++;
 				}
 			}
 		}
 
-		outter: for (int i = 0; i < size - 2; i++) {
-			if ("0".equals(strokes.get(i).getDirection())) {// 第一笔向上
-				if (strokes.get(i).getMax() < strokes.get(i + 2).getMax()) {
-					continue;
-				}
-				// 找到连续向上的笔
-				double premax = strokes.get(i + 1).getMax();
-				double premin = strokes.get(i + 1).getMin();
-				for (int j = i; j < size; j++) {
-					// 重新设置前最大最小值
-					if (strokes.get(j).getMax() > premax) {
-						premax = strokes.get(j).getMax();
-					}
-					if (strokes.get(j + 1).getMin() < premin) {
-						premin = strokes.get(j + 1).getMin();
-					}
-					// 找到临界点
-					if (strokes.get(j + 2).getMax() > premax
-							&& strokes.get(j + 2).getMax() > strokes.get(j + 4).getMax()) {
-						// 1:笔破坏
-						if (strokes.get(j + 3).getMin() < premax) {
-							// 笔破坏最终确认
-							if (overlap(strokes.get(j + 3), strokes.get(j + 4), strokes.get(j + 5)) > 0) {
-								Line tmpLine = new Line();
-								tmpLine.setStartDate(strokes.get(i).getStartDate());
-								tmpLine.setEndDate(strokes.get(j + 2).getEndDate());
-								tmpLine.setMax(strokes.get(j + 2).getMax());
-								tmpLine.setMin(strokes.get(i).getMin());
-								tmpLine.setDirection("0");
-								if (lines.size() != 0) {
-									Line lastLine = lines.get(lines.size() - 1);
-									if ("0".equals(lastLine.getDirection())) {// 跟前一线段同向
-										if (lastLine.getMax() > tmpLine.getMax()) {
-											i = j + 3 - 1;
-											continue outter;
-										} else {
-											lastLine.setEndDate(strokes.get(j + 2).getEndDate());
-											lastLine.setMax(strokes.get(j + 2).getMax());
-										}
-									} else {
-										tmpLine.setPrevId(lastLine.getId());
-										tmpLine.save(currencyId, type);
-										lastLine.setNextId(tmpLine.getId());
-										lastLine.update(currencyId, type);
-									}
-								} else {
-									tmpLine.save(currencyId, type);
-								}
-								lines.add(tmpLine);
-								List<Stroke> tmStrokes = strokes.subList(i + 3, strokes.size());
-								loopProcessLines(tmStrokes, premax, lines);
-								break outter;
-							}
-						}
-						// 2:线段破坏
-					}
-				}
-			} else {// 第一笔向下
-				if (strokes.get(i).getMin() > strokes.get(i + 2).getMin()) {
-					continue;
-				}
-				// 找到连续向下的笔
-				premax = strokes.get(i + 1).getMax();
-				premin = strokes.get(i + 1).getMin();
-				for (int j = i; j < size; j++) {
-					// 重新设置前最大最小值
-					if (strokes.get(j).getMin() < premin) {
-						premin = strokes.get(j).getMin();
-					}
-					if (strokes.get(j + 1).getMax() < premax) {
-						premax = strokes.get(j + 1).getMax();
-					}
-					// 找到临界点
-					if (strokes.get(j + 2).getMin() < premin
-							&& strokes.get(j + 2).getMin() < strokes.get(j + 4).getMin()) {
-						// 1:笔破坏
-
-						// 2:线段破坏
-					}
-
-				}
-			}
-		}
 		Line.dao.updateStroke();
 	}
 

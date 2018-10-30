@@ -160,7 +160,6 @@ public class KlineController extends BaseController {
 	public void createLine() {
 		List<Line> storeLines=new ArrayList<Line>();//生成的线段
 		List<Stroke> strokes=null;
-		List<Stroke> subList=null;
 		
 		List<Currency> listAll = Currency.dao.listAll();
 		for (Currency currency : listAll) {
@@ -172,22 +171,15 @@ public class KlineController extends BaseController {
 				if(strokes==null|| strokes.size()==0) {
 					continue;
 				}
-				for (int i = 0; i < strokes.size(); i++) {
-					if(overlap(strokes.get(i), strokes.get(i+1), strokes.get(i+2))>0) {
-						continue;
-					}
-					subList = strokes.subList(i, strokes.size());
-					break;
-				}
 			} else {
 				// 查询最后一条线段后的笔
 				Date date = lastLine.getEndDate();
-				subList = Stroke.dao.getListByDate("600721", "k", date);
+				strokes = Stroke.dao.getListByDate(currency.getCode(), "k", date);
 				if(strokes==null|| strokes.size()==0) {
 					continue;
 				}
 			}
-			loopProcessLines2(subList,null,storeLines);
+			loopProcessLines3(strokes,storeLines);
 		}
 		
 	}
