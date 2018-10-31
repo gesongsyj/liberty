@@ -89,7 +89,7 @@ public class KlineController extends BaseController {
 
 			for (Currency currency : listAll) {
 				// ===========测试,只取eurusd
-				if (!currency.getCode().equals("600687")) {
+				if (!currency.getCode().equals("002113")) {
 					continue;
 				}
 				// ===========
@@ -172,6 +172,7 @@ public class KlineController extends BaseController {
 					continue;
 				}
 			} else {
+				storeLines.add(lastLine);
 				// 查询最后一条线段后的笔
 				Date date = lastLine.getEndDate();
 				strokes = Stroke.dao.getListByDate(currency.getCode(), "k", date);
@@ -179,7 +180,9 @@ public class KlineController extends BaseController {
 					continue;
 				}
 			}
-			loopProcessLines3(strokes,storeLines);
+			if(strokes.size()>=3) {
+				loopProcessLines3(strokes,storeLines);
+			}
 		}
 		
 	}

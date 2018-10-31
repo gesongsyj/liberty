@@ -440,7 +440,7 @@ public class BaseController extends Controller {
 					premax = strokes.get(i).getMax();
 				}
 			}
-			if(strokes.get(i+2).getMin()<strokes.get(i+2).getMin() && "1".equals(strokes.get(i).getDirection())) {
+			if(strokes.get(i+2).getMin()<strokes.get(i).getMin() && "1".equals(strokes.get(i).getDirection())) {
 				if (strokes.get(i).getMin() < premin ) {
 					premin = strokes.get(i).getMin();
 				}
@@ -463,6 +463,7 @@ public class BaseController extends Controller {
 						if(tmpLine.getDirection().equals(preLine.getDirection())) {
 							preLine.setEndDate(tmpLine.getEndDate());
 							preLine.setMax(tmpLine.getMax());
+							preLine.saveOrUpdate(currencyId, type);
 						}else {
 							tmpLine.setStartDate(preLine.getEndDate());
 							tmpLine.setMin(preLine.getMin());
@@ -513,8 +514,9 @@ public class BaseController extends Controller {
 							if(tmpLine.getDirection().equals(preLine.getDirection())) {
 								preLine.setEndDate(tmpLine.getEndDate());
 								preLine.setMax(tmpLine.getMax());
+								preLine.saveOrUpdate(currencyId, type);
 							}else {
-								tmpLine.setStartDate(preLine.getStartDate());
+								tmpLine.setStartDate(preLine.getEndDate());
 								tmpLine.setMin(preLine.getMin());
 								preLine.saveOrUpdate(currencyId, type);
 								tmpLine.setPrevId(preLine.getId());
@@ -552,6 +554,7 @@ public class BaseController extends Controller {
 						Line preLine = lines.get(lines.size() - 1);
 						preLine.setEndDate(strokes.get(j+1).getEndDate());
 						preLine.setMax(strokes.get(j+1).getMax());
+						preLine.saveOrUpdate(currencyId, type);
 						if(strokes.size()>j+1) {
 							List<Stroke> subList = strokes.subList(j+2, strokes.size());
 							loopProcessLines3(subList, lines);
@@ -578,6 +581,7 @@ public class BaseController extends Controller {
 						if(tmpLine.getDirection().equals(preLine.getDirection())) {
 							preLine.setEndDate(tmpLine.getEndDate());
 							preLine.setMin(tmpLine.getMin());
+							preLine.saveOrUpdate(currencyId, type);
 						}else {
 							tmpLine.setStartDate(preLine.getEndDate());
 							tmpLine.setMax(preLine.getMax());
@@ -599,9 +603,9 @@ public class BaseController extends Controller {
 					Line preLine = lines.get(lines.size() - 1);
 					Line tmpLine2 = new Line();
 					tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
-					tmpLine2.setMax(strokes.get(i+1).getMax());
+					tmpLine2.setMin(strokes.get(i+1).getMin());
 					tmpLine2.setEndDate(strokes.get(i+3).getEndDate());
-					tmpLine2.setMin(strokes.get(i+3).getMin());
+					tmpLine2.setMax(strokes.get(i+3).getMax());
 					tmpLine2.setDirection("0");
 					tmpLine2.setPrevId(preLine.getId());
 					tmpLine2.saveOrUpdate(currencyId, type);
@@ -629,6 +633,7 @@ public class BaseController extends Controller {
 							if(tmpLine.getDirection().equals(preLine.getDirection())) {
 								preLine.setEndDate(tmpLine.getEndDate());
 								preLine.setMin(tmpLine.getMin());
+								preLine.saveOrUpdate(currencyId, type);
 							}else {
 								tmpLine.setStartDate(preLine.getStartDate());
 								tmpLine.setMax(preLine.getMax());
@@ -668,6 +673,7 @@ public class BaseController extends Controller {
 						Line preLine = lines.get(lines.size() - 1);
 						preLine.setEndDate(strokes.get(j+1).getEndDate());
 						preLine.setMin(strokes.get(j+1).getMin());
+						preLine.saveOrUpdate(currencyId, type);
 						if(strokes.size()>j+1) {
 							List<Stroke> subList = strokes.subList(j+2, strokes.size());
 							loopProcessLines3(subList, lines);
