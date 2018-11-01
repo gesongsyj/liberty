@@ -16,6 +16,8 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.common.utils.ResultMsg;
+import com.liberty.common.utils.ResultStatusCode;
 import com.liberty.common.web.BaseController;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
@@ -53,19 +55,114 @@ public class KlineController extends BaseController {
 
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
-		List<Integer> a=new ArrayList<>();
-		a.add(1);
-		a.add(2);
-		a.add(3);
-		a.add(4);
+		List<List<Integer>> a=new ArrayList<>();
 		List<Integer> b=new ArrayList<>();
 		b.add(1);
 		b.add(2);
 		b.add(3);
-		a.removeAll(b);
+		a.add(b);
+		a.add(b);
 		System.err.println(a);
 	}
 
+	public void charts() {
+		render("kline.html");
+	}
+	
+	public void chartsData() {
+		List<Kline> allKlines=Kline.dao.listAll();
+		Map<String, List> resultMap=new HashMap<String, List>();
+//		renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
+		List<List<Double>> klines=new ArrayList<List<Double>>();
+		List<String> dates=new ArrayList<String>();
+		for (Kline kline : allKlines) {
+			List<Double> klineNums=new ArrayList<Double>();
+			klineNums.add(kline.getOpen());
+			klineNums.add(kline.getClose());
+			klineNums.add(kline.getMin());
+			klineNums.add(kline.getMax());
+			klines.add(klineNums);
+			dates.add(DateUtil.dateStr(kline.getDate(), "yyyy-MM-dd HH:mm:ss"));
+		}
+		resultMap.put("klines", klines);
+		resultMap.put("dates", dates);
+		
+		List<Stroke> allStrokes=Stroke.dao.listAll();
+		List<List<Object>> strokes=new ArrayList<List<Object>>();
+		for (int i = 0; i < allStrokes.size(); i++) {
+			List<Object> strokeNums= new ArrayList<Object>();
+			strokeNums.add(allStrokes.get(i).getStartDate());
+			if("0".equals(allStrokes.get(i).getDirection())) {
+				strokeNums.add(allStrokes.get(i).getMin());
+			}else {
+				strokeNums.add(allStrokes.get(i).getMax());
+			}
+			if(i==allStrokes.size()-1) {
+				strokeNums.add(allStrokes.get(i).getEndDate());
+				if("0".equals(allStrokes.get(i).getDirection())) {
+					strokeNums.add(allStrokes.get(i).getMax());
+				}else {
+					strokeNums.add(allStrokes.get(i).getMin());
+				}
+			}
+			strokes.add(strokeNums);
+		}
+		resultMap.put("strokes", strokes);
+		
+		List<Line> allLines=Line.dao.listAll();
+		List<List<Map<String, Object>>> lines=new ArrayList<List<Map<String, Object>>>();
+		
+		List<List<Object>> lineStrokes=new ArrayList<List<Object>>();
+		
+		for (int i = 0; i < allLines.size(); i++) {
+			List<Map<String, Object>> perLine=new ArrayList<Map<String, Object>>();
+			Map<String, Object> start=new HashMap<String, Object>();
+			List<Object> startNum=new ArrayList<Object>();
+			Map<String, Object> end=new HashMap<String, Object>();
+			List<Object> endNum=new ArrayList<Object>();
+			startNum.add(DateUtil.dateStr(allLines.get(i).getStartDate(), "yyyy-MM-dd HH:mm:ss"));
+			if("0".equals(allLines.get(i).getDirection())) {
+				startNum.add(allLines.get(i).getMin());
+			}else {
+				startNum.add(allLines.get(i).getMax());
+			}
+			start.put("coord", startNum);
+			
+			endNum.add(DateUtil.dateStr(allLines.get(i).getEndDate(), "yyyy-MM-dd HH:mm:ss"));
+			if("0".equals(allLines.get(i).getDirection())) {
+				endNum.add(allLines.get(i).getMax());
+			}else {
+				endNum.add(allLines.get(i).getMin());
+			}
+			end.put("coord", endNum);
+			perLine.add(start);
+			perLine.add(end);
+			lines.add(perLine);
+			
+			List<Object> strokeLineNums= new ArrayList<Object>();
+			strokeLineNums.add(allLines.get(i).getStartDate());
+			if("0".equals(allLines.get(i).getDirection())) {
+				strokeLineNums.add(allLines.get(i).getMin());
+			}else {
+				strokeLineNums.add(allLines.get(i).getMax());
+			}
+			if(i==allLines.size()-1) {
+				strokeLineNums.add(allLines.get(i).getEndDate());
+				if("0".equals(allLines.get(i).getDirection())) {
+					strokeLineNums.add(allLines.get(i).getMax());
+				}else {
+					strokeLineNums.add(allLines.get(i).getMin());
+				}
+			}
+			lineStrokes.add(strokeLineNums);
+		}
+		
+		resultMap.put("lines", lines);
+		resultMap.put("lineStrokes", lineStrokes);
+		
+		renderJson(new ResultMsg(ResultStatusCode.OK,resultMap));
+	}
+	
 	/**
 	 * K线数据下载
 	 * 

@@ -78,4 +78,10 @@ public class Kline extends BaseKline<Kline> {
 		return list;
 	}
 
+	public List<Kline> listAll() {
+		String sql = getSqlFromTemplate();
+		List<Kline> list = dao.find(sql);
+		return list;
+	}
+
 }

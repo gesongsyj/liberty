@@ -28,3 +28,9 @@
 	#end
 	order by endDate desc
 #end
+
+#sql("listAll")
+	select *
+	from line
+	order by endDate asc
+#end

@@ -635,7 +635,7 @@ public class BaseController extends Controller {
 								preLine.setMin(tmpLine.getMin());
 								preLine.saveOrUpdate(currencyId, type);
 							}else {
-								tmpLine.setStartDate(preLine.getStartDate());
+								tmpLine.setStartDate(preLine.getEndDate());
 								tmpLine.setMax(preLine.getMax());
 								preLine.saveOrUpdate(currencyId, type);
 								tmpLine.setPrevId(preLine.getId());

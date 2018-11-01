@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+<meta charset="utf-8">
+<title>ECharts</title>
+</head>
+<body style="height: 100%; margin: 0">
+	<div id="container" style="height: 100%"></div>
+	<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+	
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+	<script type="text/javascript"
+		src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+	<script type="text/javascript"
+		src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+	<script type="text/javascript">
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('container'));
+
+		// 指定图表的配置项和数据
+		var option =
+
+		{
+			"yAxis" : [ {
+				"nameLocation" : "middle",
+				"axisTick" : {
+					"alignWithLabel" : false
+				},
+				"scale" : true,
+				"show" : true,
+				"axisLabel" : {
+					"textStyle" : {
+						"fontSize" : 12
+					},
+					"interval" : "auto",
+					"margin" : 8,
+					"rotate" : 0,
+					"formatter" : "{value} "
+				},
+				"splitLine" : {
+					"show" : true
+				},
+				"boundaryGap" : true,
+				"nameTextStyle" : {
+					"fontSize" : 14
+				},
+				"nameGap" : 25,
+				"inverse" : false,
+				"splitArea" : {
+					"show" : true
+				},
+				"type" : "value"
+			} ],
+			"color" : [ "#c23531", "#2f4554", "#61a0a8", "#d48265", "#749f83",
+					"#ca8622", "#bda29a", "#6e7074", "#546570", "#c4ccd3",
+					"#f05b72", "#ef5b9c", "#f47920", "#905a3d", "#fab27b",
+					"#2a5caa", "#444693", "#726930", "#b2d235", "#6d8346",
+					"#ac6767", "#1d953f", "#6950a1", "#918597", "#f6f5ec" ],
+			"series" : [ {
+				"seriesId" : 4247545,
+				"markLine" : {
+					"data" : []
+				},
+				"name" : "K",
+				"itemStyle" : {
+					"normal" : {
+						"color" : "#ef232a",
+						"color0" : "#14b143",
+						"borderColor0" : "#14b143",
+						"borderColor" : "#ef232a"
+					}
+				},
+				//K线
+				"data" : [],
+				"markPoint" : {
+					"data" : []
+				},
+				"type" : "candlestick"
+			}, {
+				"seriesId" : 4247545,
+				"markLine" : {
+					"data" : []
+				},
+				"name" : "\u7b14",
+				//笔
+				"data" : [],
+				"symbol" : "emptyCircle",
+				"smooth" : false,
+				"label" : {
+					"emphasis" : {
+						"textStyle" : {
+							"fontSize" : 12
+						},
+						"show" : true
+					},
+					"normal" : {
+						"position" : "top",
+						"textStyle" : {
+							"fontSize" : 12
+						},
+						"show" : false
+					}
+				},
+				"step" : false,
+				"yAxisIndex" : 0,
+				"symbolSize" : 4,
+				"markPoint" : {
+					"data" : []
+				},
+				"areaStyle" : {
+					"opacity" : 0
+				},
+				"lineStyle" : {
+					"normal" : {
+						"opacity" : 1,
+						"width" : 1,
+						"type" : "solid",
+						"curveness" : 0
+					}
+				},
+				"xAxisIndex" : 0,
+				"type" : "line",
+				"showSymbol" : true
+			}, {
+				"seriesId" : 4247545,
+				"markLine" : {
+					"lineStyle" : {
+						"normal" : {
+							"type" : "solid"
+						}
+					},
+					//线段
+					"data" : [],
+					"symbolSize" : 0
+				},
+				"name" : "\u7ebf",
+				//线段的笔
+				//"data": [], 
+				"symbol" : "circle",
+				"label" : {
+					"emphasis" : {
+						"textStyle" : {
+							"fontSize" : 12
+						},
+						"show" : true
+					},
+					"normal" : {
+						"position" : "top",
+						"textStyle" : {
+							"fontSize" : 12
+						},
+						"show" : false
+					}
+				},
+				"yAxisIndex" : 0,
+				"symbolSize" : 2,
+				"markPoint" : {
+					"data" : []
+				},
+				"xAxisIndex" : 0,
+				"type" : "scatter"
+			} ],
+			"title" : [ {
+				"textStyle" : {
+					"fontSize" : 18
+				},
+				"top" : "auto",
+				"subtextStyle" : {
+					"fontSize" : 12
+				},
+				"left" : "auto"
+			} ],
+			"tooltip" : {
+				"borderColor" : "#333",
+				"axisPointer" : {
+					"type" : "cross"
+				},
+				"textStyle" : {
+					"fontSize" : 14
+				},
+				"trigger" : "axis",
+				"borderWidth" : 0,
+				"backgroundColor" : "rgba(50,50,50,0.7)",
+				"triggerOn" : "mousemove|click"
+			},
+			"series_id" : 4247545,
+			"grid" : [ {
+				"top" : 0,
+				"bottom" : 0
+			}, {
+				"top" : 0,
+				"bottom" : 0
+			} ],
+			"xAxis" : [ {
+				"nameLocation" : "middle",
+				"axisTick" : {
+					"alignWithLabel" : false
+				},
+				"scale" : true,
+				"show" : true,
+				"type" : "category",
+				"axisLabel" : {
+					"textStyle" : {
+						"fontSize" : 12
+					},
+					"interval" : "auto",
+					"margin" : 8,
+					"rotate" : 0
+				},
+				"splitLine" : {
+					"show" : false
+				},
+				"boundaryGap" : true,
+				"nameTextStyle" : {
+					"fontSize" : 14
+				},
+				"nameGap" : 25,
+				"inverse" : false,
+				"data" : []
+			} ],
+			"dataZoom" : [ {
+				"start" : 80,
+				"end" : 100,
+				"type" : "slider",
+				"orient" : "horizontal",
+				"show" : true
+			}, {
+				"start" : 80,
+				"show" : true,
+				"end" : 100,
+				"orient" : "horizontal",
+				"type" : "inside"
+			} ],
+			"toolbox" : {
+				"orient" : "vertical",
+				"top" : "center",
+				"show" : true,
+				"feature" : {
+					"restore" : {
+						"show" : true
+					},
+					"dataView" : {
+						"show" : true
+					},
+					"saveAsImage" : {
+						"show" : true,
+						"title" : "\u4e0b\u8f7d\u56fe\u7247"
+					}
+				},
+				"left" : "95%"
+			},
+			"legend" : [ {
+				"textStyle" : {
+					"fontSize" : 12
+				},
+				"show" : true,
+				"top" : "top",
+				"selectedMode" : "multiple",
+				"data" : [ "K", "\u7b14", "\u7ebf" ],
+				"orient" : "horizontal",
+				"left" : "center"
+			} ]
+		}
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option);
+
+		// 异步加载数据
+		$.get('chartsData').done(function(data) {
+			// 填入数据
+			myChart.setOption({
+				xAxis : {
+					data : data.p2pdata.dates
+				},
+				series : [ 
+					{
+						//k线
+						data: data.p2pdata.klines
+					},
+					{
+						//笔
+						data: data.p2pdata.strokes
+					},
+					{
+						//线段
+						markLine: {
+							data: data.p2pdata.lines
+						},
+						data: data.p2pdata.lineStrokes
+					}
+				]
+			});
+		});
+	</script>
+</body>
+</html>

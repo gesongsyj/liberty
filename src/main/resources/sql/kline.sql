@@ -96,3 +96,9 @@
 	order by date asc
 #end
 
+#sql("listAll")
+	select *
+	from kline
+	order by date asc
+#end
+

@@ -98,4 +98,10 @@ public class Stroke extends BaseStroke<Stroke> {
 		List<Stroke> list = dao.find(sqlPara);
 		return list;
 	}
+
+	public List<Stroke> listAll() {
+		String sql = getSqlFromTemplate();
+		List<Stroke> list = dao.find(sql);
+		return list;
+	}
 }

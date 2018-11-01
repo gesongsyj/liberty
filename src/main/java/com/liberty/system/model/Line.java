@@ -81,4 +81,10 @@ public class Line extends BaseLine<Line> {
 		Line line = dao.findFirst(sqlPara);
 		return line;
 	}
+
+	public List<Line> listAll() {
+		String sql = getSqlFromTemplate();
+		List<Line> list = dao.find(sql);
+		return list;
+	}
 }

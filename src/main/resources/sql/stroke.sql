@@ -79,3 +79,9 @@
 	#end
 	order by startDate asc
 #end
+
+#sql("listAll")
+	select *
+	from stroke
+	order by startDate asc
+#end
