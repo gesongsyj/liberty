@@ -10,3 +10,6 @@
 #namespace("line")
 	#include("line.sql")
 #end
+#namespace("account")
+	#include("account.sql")
+#end

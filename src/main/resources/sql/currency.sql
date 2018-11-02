@@ -2,8 +2,12 @@
 	select *
 	from currency
 	#set(flag=0)
-	#if(qo.keyword)
-		#(flag==0?"where":"and") id like concat('%',#para(qo.keyword),'%')
+	#if(qo.name)
+		#(flag==0?"where":"and") name like concat("%",#para(qo.name),"%")
+		#set(flag=1)
+	#end
+	#if(qo.code)
+		#(flag==0?"where":"and") code=#para(qo.code)
 		#set(flag=1)
 	#end
 #end

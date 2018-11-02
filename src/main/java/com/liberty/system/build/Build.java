@@ -20,7 +20,7 @@ public class Build {
 		MyGenerator generator = new MyGenerator("com.liberty.system", "jfinal.properties", true);
 		generator.setUsername("username");
 		generator.setMappingKitPackageName("com.liberty.common.jfinal");
-		generator.addIncludedTable("currency");
+		generator.addIncludedTable("account");
 		generator.generate();
 		
 	}

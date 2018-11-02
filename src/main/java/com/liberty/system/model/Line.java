@@ -87,4 +87,10 @@ public class Line extends BaseLine<Line> {
 		List<Line> list = dao.find(sql);
 		return list;
 	}
+
+	public List<Line> listAllByCode(String code, String type) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
+		List<Line> list = dao.find(sqlPara);
+		return list;
+	}
 }

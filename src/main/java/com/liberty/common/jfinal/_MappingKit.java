@@ -1,5 +1,6 @@
 package com.liberty.common.jfinal;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.liberty.system.model.Account;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.model.Line;
@@ -22,6 +23,7 @@ public class _MappingKit {
 		arp.addMapping("stroke", "id", Stroke.class);
 		arp.addMapping("currency", "id", Currency.class);
 		arp.addMapping("line", "id", Line.class);
+		arp.addMapping("account", "id", Account.class);
 	}
 }
 

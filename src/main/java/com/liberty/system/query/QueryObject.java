@@ -2,7 +2,7 @@ package com.liberty.system.query;
 
 abstract public class QueryObject {
 	private Integer currentPage = 1;
-	private Integer pageSize = 5;
+	private Integer pageSize = 10;
 
 	protected boolean hasLength(String str) {
 		return str != null && !"".equals(str.trim());

@@ -16,12 +16,12 @@ public class RoutineController extends BaseController implements Job {
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
-		CurrencyController currencyController = new CurrencyController();
-		currencyController.updateCurrency();
-		
+//		CurrencyController currencyController = new CurrencyController();
+//		currencyController.updateCurrency();
 		KlineController klineController = new KlineController();
 		klineController.downloadData();
 		klineController.createStroke();
+		klineController.createLine();
 	}
 	
 }

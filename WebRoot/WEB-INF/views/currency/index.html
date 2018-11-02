@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Currency</title>
+
+<script
+	src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
+<!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css"
+	integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+	crossorigin="anonymous">
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	crossorigin="anonymous"></script>
+
+<script type="text/javascript"
+	src="twbspagination/jquery.twbsPagination.min.js"></script>
+<script type="text/javascript">
+		$(function() {
+			$('#query').click(function() {
+				$('#currentPage').val(1);
+				$('#currencyForm').submit();
+			});
+			$('#pagination').twbsPagination({
+				totalPages: ${pageResult.totalPage},
+				visiblePages:5,
+				startPage:${pageResult.pageNumber},
+				onPageClick:function(event,page){
+					$('#currentPage').val(page);
+					$('#currencyForm').submit();
+				}
+			});
+		})
+
+</script>
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Stock Analysis</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Dashboard</a></li>
+					<li><a href="#">Settings</a></li>
+					<li><a href="#">Profile</a></li>
+					<li><a href="#">Help</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<hr>
+	<hr>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3 col-md-2 sidebar"
+				style="background-color: #f5f5f5; bottom: 0px; position: fixed; top: 50px; padding: 20px;">
+				<ul class="nav nav-sidebar">
+					<li class="active"><a href="list">股票列表 <span
+							class="sr-only">(current)</span></a></li>
+					<li><a href="#">新增股票</a></li>
+				</ul>
+			</div>
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
+				<form id="currencyForm" action="list" class="form-inline"
+					style="margin-top: 30px;" method="post">
+					<input type="hidden" id="currentPage" name="qo.currentPage" value="" />
+					<div class="form-group" style="margin-left: 3%;">
+						<label for="exampleInputName2">股票名称</label> <input type="text"
+							class="form-control" id="exampleInputName2" name="qo.name">
+					</div>
+					<div class="form-group" style="margin-left: 3%">
+						<label for="exampleInputEmail2">股票代码</label> <input type="email"
+							class="form-control" id="exampleInputEmail2" name="qo.code">
+					</div>
+					<button id="query" type="submit" class="btn btn-default"
+						style="margin-left: 3%">Search</button>
+				</form>
+				<table class="table table-bordered" style="margin-top: 50px;">
+					<thead>
+						<tr>
+							<th>序号
+							<th>股票名称
+							<th>股票代码
+							<th>操作
+						</tr>
+					</thead>
+					<tbody>
+						<#if pageResult.list?size==0>
+						<tr>
+							<td colspan="4">暂无数据...
+						</tr>
+
+						</#if>
+						<#list pageResult.list as p>
+						<tr>
+							<td>${p_index+1}
+							<td>${p.name}
+							<td>${p.code}
+							<td><a class="btn btn-default" href="kline/charts?currencyId=${p.id}" role="button" target="_Blank">查看图表</a></td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+				<div style="text-align: center;">
+					<ul id="pagination" class="pagination-sm"></ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

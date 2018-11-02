@@ -670,6 +670,9 @@ public class BaseController extends Controller {
 						break outter;
 					}
 					if(strokes.get(j+1).getMin()<strokes.get(i).getMin()) {
+						if(lines.size()==0) {
+							continue outter;
+						}
 						Line preLine = lines.get(lines.size() - 1);
 						preLine.setEndDate(strokes.get(j+1).getEndDate());
 						preLine.setMin(strokes.get(j+1).getMin());

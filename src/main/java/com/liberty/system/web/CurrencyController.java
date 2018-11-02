@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.liberty.common.utils.HTTPUtils;
 import com.liberty.common.utils.JsonToMap;
@@ -28,5 +29,4 @@ public class CurrencyController extends BaseController {
 		currency.update();
 		renderText("ok");
 	}
-
 }

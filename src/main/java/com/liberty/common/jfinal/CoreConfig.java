@@ -95,8 +95,8 @@ public class CoreConfig extends JFinalConfig {
 
 	@Override
 	public void afterJFinalStart() {
-		CurrencyController currencyController = new CurrencyController();
-		currencyController.updateCurrency();
+//		CurrencyController currencyController = new CurrencyController();
+//		currencyController.updateCurrency();
 		KlineController klineController = new KlineController();
 		klineController.downloadData();
 		klineController.createStroke();

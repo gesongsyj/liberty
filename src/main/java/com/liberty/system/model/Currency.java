@@ -1,12 +1,14 @@
 package com.liberty.system.model;
 
 import java.util.List;
+import java.util.Map;
 
 import com.jfinal.kit.Kv;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.liberty.system.model.base.BaseCurrency;
 import com.liberty.system.model.base.BaseStroke;
+import com.liberty.system.query.QueryObject;
 import com.liberty.system.query.StrokeQueryObject;
 
 /**
@@ -15,13 +17,18 @@ import com.liberty.system.query.StrokeQueryObject;
 @SuppressWarnings("serial")
 public class Currency extends BaseCurrency<Currency> {
 	public static final Currency dao = new Currency().dao();
-	
+
+	public Page<Currency> paginate(QueryObject qo) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("qo", qo));
+		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
+	}
+
 	public Currency findByCode(String code) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code));
 		Currency currency = dao.findFirst(sqlPara);
 		return currency;
 	}
-	
+
 	public List<Currency> listAll() {
 		String sql = getSqlFromTemplate();
 		List<Currency> list = dao.find(sql);

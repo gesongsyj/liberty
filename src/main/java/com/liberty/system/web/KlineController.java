@@ -66,28 +66,40 @@ public class KlineController extends BaseController {
 	}
 
 	public void charts() {
+		String currencyId = paras.get("currencyId");
+		if(currencyId==null) {
+			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
+			return;
+		}
+		Currency currency = Currency.dao.findById(currencyId);
+		setAttr("code", currency.getCode());
 		render("kline.html");
 	}
 	
-	public void chartsData() {
-		List<Kline> allKlines=Kline.dao.listAll();
-		Map<String, List> resultMap=new HashMap<String, List>();
-//		renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
-		List<List<Double>> klines=new ArrayList<List<Double>>();
-		List<String> dates=new ArrayList<String>();
-		for (Kline kline : allKlines) {
-			List<Double> klineNums=new ArrayList<Double>();
-			klineNums.add(kline.getOpen());
-			klineNums.add(kline.getClose());
-			klineNums.add(kline.getMin());
-			klineNums.add(kline.getMax());
-			klines.add(klineNums);
-			dates.add(DateUtil.dateStr(kline.getDate(), "yyyy-MM-dd HH:mm:ss"));
+	public void fetchData() {
+		String code = paras.get("code");
+		if(code==null) {
+			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
+			return;
 		}
-		resultMap.put("klines", klines);
-		resultMap.put("dates", dates);
+		List<Kline> allKlines=Kline.dao.listAllByCode(code, "k");
+		List<Stroke> allStrokes=Stroke.dao.listAllByCode(code, "k");
+		List<Line> allLines=Line.dao.listAllByCode(code, "k");
 		
-		List<Stroke> allStrokes=Stroke.dao.listAll();
+		List<List<Object>> klines=new ArrayList<List<Object>>();
+		for (int i = 0; i < allKlines.size(); i++) {
+			List<Object> klineData=new ArrayList<Object>();
+			klineData.add(allKlines.get(i).getDate());
+			klineData.add(allKlines.get(i).getOpen());
+			klineData.add(allKlines.get(i).getClose());
+			klineData.add(allKlines.get(i).getMin());
+			klineData.add(allKlines.get(i).getMax());
+			klineData.add(allKlines.get(i).getDiff());//index:5
+			klineData.add(allKlines.get(i).getDea());
+			klineData.add(allKlines.get(i).getBar());
+			klines.add(klineData);
+		}
+		
 		List<List<Object>> strokes=new ArrayList<List<Object>>();
 		for (int i = 0; i < allStrokes.size(); i++) {
 			List<Object> strokeNums= new ArrayList<Object>();
@@ -107,13 +119,9 @@ public class KlineController extends BaseController {
 			}
 			strokes.add(strokeNums);
 		}
-		resultMap.put("strokes", strokes);
 		
-		List<Line> allLines=Line.dao.listAll();
 		List<List<Map<String, Object>>> lines=new ArrayList<List<Map<String, Object>>>();
-		
 		List<List<Object>> lineStrokes=new ArrayList<List<Object>>();
-		
 		for (int i = 0; i < allLines.size(); i++) {
 			List<Map<String, Object>> perLine=new ArrayList<Map<String, Object>>();
 			Map<String, Object> start=new HashMap<String, Object>();
@@ -157,9 +165,11 @@ public class KlineController extends BaseController {
 			lineStrokes.add(strokeLineNums);
 		}
 		
+		Map<String, List> resultMap=new HashMap<String, List>();
+		resultMap.put("klines", klines);
+		resultMap.put("strokes", strokes);
 		resultMap.put("lines", lines);
 		resultMap.put("lineStrokes", lineStrokes);
-		
 		renderJson(new ResultMsg(ResultStatusCode.OK,resultMap));
 	}
 	
@@ -185,10 +195,10 @@ public class KlineController extends BaseController {
 			// ================
 
 			for (Currency currency : listAll) {
-				// ===========测试,只取eurusd
-				if (!currency.getCode().equals("002113")) {
-					continue;
-				}
+				// ===========测试
+//				if (!currency.getCode().equals("002113")) {
+//					continue;
+//				}
 				// ===========
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
 				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
@@ -214,9 +224,11 @@ public class KlineController extends BaseController {
 				}
 
 				klineMap.put(currency.getCode() + "_" + record.getStr("key"), klineList);
+				Kline.dao.saveMany(klineMap, lastKlineMap);
+				klineMap.clear();
+				lastKlineMap.clear();
 			}
 		}
-		Kline.dao.saveMany(klineMap, lastKlineMap);
 		renderText("ok");
 	}
 
