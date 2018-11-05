@@ -267,11 +267,11 @@ public class KlineController extends BaseController {
 
 	@Before(Tx.class)
 	public void createLine() {
-		List<Line> storeLines=new ArrayList<Line>();//生成的线段
 		List<Stroke> strokes=null;
 		
 		List<Currency> listAll = Currency.dao.listAll();
 		for (Currency currency : listAll) {
+			List<Line> storeLines=new ArrayList<Line>();//生成的线段
 			Line lastLine = Line.dao.getLastByCode(currency.getCode(),"k");
 			
 			if (lastLine == null) {

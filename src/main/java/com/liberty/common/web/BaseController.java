@@ -433,6 +433,18 @@ public class BaseController extends Controller {
 		}
 		outter:
 		for (int i = 0; i < size-3; i++) {
+			if(i==2 && "0".equals(strokes.get(i).getDirection())) {
+				//第一笔包含第三笔
+				if(strokes.get(i-2).getMax()>strokes.get(i).getMax()) {
+					premax=strokes.get(i).getMax();
+				}
+			}
+			if(i==2 && "1".equals(strokes.get(i).getDirection())) {
+				//第一笔包含第三笔
+				if(strokes.get(i-2).getMin()<strokes.get(i).getMin()) {
+					premin=strokes.get(i).getMin();
+				}
+			}
 			
 			//重新设置前最大最小值
 			if(strokes.get(i+2).getMax()>strokes.get(i).getMax()&& "0".equals(strokes.get(i).getDirection())) {
@@ -494,7 +506,7 @@ public class BaseController extends Controller {
 					preLine.setNextId(tmpLine2.getId());
 					preLine.saveOrUpdate(currencyId, type);
 					lines.add(tmpLine2);
-					if(strokes.size()>i+3) {
+					if(strokes.size()-1>i+3) {
 						List<Stroke> subList = strokes.subList(i+4, strokes.size());
 						loopProcessLines3(subList, lines);
 					}
@@ -544,22 +556,16 @@ public class BaseController extends Controller {
 						preLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine2);
 						
-						if(strokes.size()>j) {
+						if(strokes.size()-1>j) {
 							List<Stroke> subList = strokes.subList(j+1, strokes.size());
 							loopProcessLines3(subList, lines);
 						}
 						break outter;
 					}
 					if(strokes.get(j+1).getMax()>strokes.get(i).getMax()) {
-						Line preLine = lines.get(lines.size() - 1);
-						preLine.setEndDate(strokes.get(j+1).getEndDate());
-						preLine.setMax(strokes.get(j+1).getMax());
-						preLine.saveOrUpdate(currencyId, type);
-						if(strokes.size()>j+1) {
-							List<Stroke> subList = strokes.subList(j+2, strokes.size());
-							loopProcessLines3(subList, lines);
-						}
-						break outter;
+						premax=strokes.get(j+1).getMax();
+						i=j+1;
+						continue outter;
 					}
 					j++;
 				}
@@ -613,7 +619,7 @@ public class BaseController extends Controller {
 					preLine.saveOrUpdate(currencyId, type);
 					lines.add(tmpLine2);
 					
-					if(strokes.size()>i+3) {
+					if(strokes.size()-1>i+3) {
 						List<Stroke> subList = strokes.subList(i+4, strokes.size());
 						loopProcessLines3(subList, lines);
 					}
@@ -663,25 +669,16 @@ public class BaseController extends Controller {
 						preLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine2);
 						
-						if(strokes.size()>j) {
+						if(strokes.size()-1>j) {
 							List<Stroke> subList = strokes.subList(j+1, strokes.size());
 							loopProcessLines3(subList, lines);
 						}
 						break outter;
 					}
 					if(strokes.get(j+1).getMin()<strokes.get(i).getMin()) {
-						if(lines.size()==0) {
-							continue outter;
-						}
-						Line preLine = lines.get(lines.size() - 1);
-						preLine.setEndDate(strokes.get(j+1).getEndDate());
-						preLine.setMin(strokes.get(j+1).getMin());
-						preLine.saveOrUpdate(currencyId, type);
-						if(strokes.size()>j+1) {
-							List<Stroke> subList = strokes.subList(j+2, strokes.size());
-							loopProcessLines3(subList, lines);
-						}
-						break outter;
+						premin=strokes.get(j+1).getMin();
+						i=j+1;
+						continue outter;
 					}
 					j++;
 				}
@@ -1036,6 +1033,8 @@ public class BaseController extends Controller {
 
 				if (shapes.size() == 0) {// 第一个分型
 					shapes.add(shape);
+					index = i + 1;
+					strokeStartIndex = i + 1;
 				} else {
 					Shape lastShape = shapes.get(shapes.size() - 1);
 					if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
@@ -1134,6 +1133,8 @@ public class BaseController extends Controller {
 
 				if (shapes.size() == 0) {// 第一个分型
 					shapes.add(shape);
+					index = i + 1;
+					strokeStartIndex = i + 1;
 				} else {
 					Shape lastShape = shapes.get(shapes.size() - 1);
 					if (lastShape.getType().equals(shape.getType())) {// 与前一个分型类型相同
@@ -1141,7 +1142,7 @@ public class BaseController extends Controller {
 							lastShape.setDate(shape.getDate());
 							lastShape.setMin(shape.getMin());
 							index = i + 1;
-							strokeStartIndex = i + 1;// ++++++++++++++
+							strokeStartIndex = i + 1;
 							if (strokes.size() != 0) {
 								Stroke lastStroke = strokes.get(strokes.size() - 1);
 								lastStroke.setMin(shape.getMin());
