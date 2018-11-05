@@ -27,12 +27,15 @@
 	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
 	crossorigin="anonymous"></script>
 <script type="text/javascript">
-		$(function() {
-			$('#query').click(function() {
-				$('#addSearchForm').submit();
-			});
-		})
-
+	$(function() {
+		$('#query').click(function() {
+			$('#addSearchForm').submit();
+		});
+		$('#down_btn').click(function() {
+			$('#down_btn_text').text("正在下载,请稍后...");
+			$('#downForm').submit();
+		});
+	})
 </script>
 </head>
 <body>
@@ -95,13 +98,21 @@
 							<td colspan="4">暂无数据...
 						</tr>
 
-						</#if>
-						<#list cs as p>
+						</#if> <#list cs as p>
 						<tr>
 							<td>${p_index+1}
 							<td>${p.name}
-							<td>${p.code}
-							<td><a class="btn btn-default" href="add?code=${p.code}&name=${p.name}&currencyType=${p.currencyType}" role="button">下载数据</a></td>
+							<td>${p.code} <!-- <td><a class="btn btn-default"
+								href="add?code=${p.code}&name=${p.name}&currencyType=${p.currencyType}"
+								role="button">下载数据</a></td> -->
+							<td><button type="button" class="btn btn-primary btn-lg"
+									data-toggle="modal" data-target="#myModal">下载数据</button></td>
+							<form id="downForm" action="add" class="form-inline"
+								 method="post" hidden="true">
+								<input type="hidden" id="code" name="c.code" value="${p.code}" />
+								<input type="hidden" id="name" name="c.name" value="${p.name}" />
+								<input type="hidden" id="currencyType" name="c.currencyType" value="${p.currencyType}" />
+							</form>
 						</tr>
 						</#list>
 					</tbody>
@@ -109,5 +120,28 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">数据下载</h4>
+				</div>
+				<div class="modal-body" style="text-align: center;"
+					id="down_btn_text">是否确认下载该股票数据?</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">暂时不下载</button>
+					<button type="button" class="btn btn-primary" id="down_btn">确认下载</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </body>
 </html>

@@ -26,7 +26,7 @@ import com.liberty.system.model.Kline;
 import com.liberty.system.service.CurrencyKit;
 
 public class CurrencyKit_Gp implements CurrencyKit {
-	private final int pagesize = 5;// 5页股票排行数据,每页20条,共100条数据
+	private final int pagesize = 1;// 5页股票排行数据,每页20条,共100条数据
 	private final String ex_url_shanghai = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&cmd=C.2&st=(ChangePercent)&sr=-1&p=1&ps=20&_=1538047395924";
 	private final String ex_url_shenzhen = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&token=4f1862fc3b5e77c150a2b985b12db0fd&sty=FCOIATC&cmd=C._SZAME&st=(ChangePercent)&sr=-1&p=1&ps=20&_=1538047395924";
 

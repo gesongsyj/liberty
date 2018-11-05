@@ -70,23 +70,29 @@ public class CurrencyController extends BaseController {
 	}
 
 	public void add() {
-		if (!paras.containsKey("code") || !paras.containsKey("name") || !paras.containsKey("currencyType")) {
+//		if (!paras.containsKey("code") || !paras.containsKey("name") || !paras.containsKey("currencyType")) {
+//			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
+//			return;
+//		}
+		Currency c = getBean(Currency.class, "c");
+		if(c.getCode()==null || c.getName()==null || c.getCurrencyType()==null){
 			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
 			return;
 		}
-		Currency find = Currency.dao.findByCode(paras.get("code"));
+		Currency find = Currency.dao.findByCode(c.getCode());
 		if (find != null) {
 			renderJson(new ResultMsg(ResultStatusCode.CURRENCY_EXISTS));
 			return;
 		}
-		Currency currency = new Currency();
-		currency.setCode(paras.get("code"));
-		currency.setName(paras.get("name"));
-		currency.setCurrencyType(paras.get("currencyType"));
-		currency.save();
+//		Currency currency = new Currency();
+//		currency.setCode(paras.get("code"));
+//		currency.setName(paras.get("name"));
+//		currency.setCurrencyType(paras.get("currencyType"));
+//		currency.save();
+		c.save();
 
 		KlineController klineController = new KlineController();
-		klineController.downloadData(currency.getCode());
+		klineController.downloadData(c.getCode());
 		klineController.createStroke();
 		klineController.createLine();
 		list();
