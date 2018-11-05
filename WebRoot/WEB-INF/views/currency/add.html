@@ -33,6 +33,8 @@
 		});
 		$('#down_btn').click(function() {
 			$('#down_btn_text').text("正在下载,请稍后...");
+			$("#cancel_btn").attr("disabled", true);
+			$("#down_btn").attr("disabled", true);
 			$('#downForm').submit();
 		});
 	})
@@ -77,8 +79,8 @@
 				<form id="addSearchForm" action="addSearch" class="form-inline"
 					style="margin-top: 30px;" method="post">
 					<div class="form-group" style="margin-left: 3%">
-						<label for="exampleInputEmail2">股票代码</label> <input type="text"
-							class="form-control" id="exampleInputEmail" name="qo.code">
+						<label for="exampleInputEmail2">股票名称或代码</label> <input type="text"
+							class="form-control" id="exampleInputEmail" name="qo.keyword">
 					</div>
 					<button id="query" type="submit" class="btn btn-default"
 						style="margin-left: 3%">Search</button>
@@ -136,7 +138,7 @@
 				<div class="modal-body" style="text-align: center;"
 					id="down_btn_text">是否确认下载该股票数据?</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">暂时不下载</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_btn">暂时不下载</button>
 					<button type="button" class="btn btn-primary" id="down_btn">确认下载</button>
 				</div>
 			</div>

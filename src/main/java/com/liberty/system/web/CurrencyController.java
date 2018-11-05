@@ -1,5 +1,7 @@
 package com.liberty.system.web;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +46,18 @@ public class CurrencyController extends BaseController {
 
 	public void addSearch() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
-		String code = qo.getCode();
+		String keyword=qo.getKeyword();
 		List<Currency> cs = new ArrayList<Currency>();
-		if (code != null) {
+		if (keyword != null) {
+			try {
+				keyword=URLEncoder.encode(keyword, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 //		String url="http://searchapi.eastmoney.com/api/suggest/get?input="+code+"&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=5";
 			Map<String, String> params = new HashMap<String, String>();
-			params.put("input", code);
+			params.put("input", keyword);
 			params.put("type", "14");
 			params.put("token", "D43BF722C8E33BDC906FB84D85E326E8");
 			params.put("count", "5");
