@@ -26,23 +26,10 @@
 	src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
 	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
 	crossorigin="anonymous"></script>
-
-<script type="text/javascript"
-	src="../twbspagination/jquery.twbsPagination.min.js"></script>
 <script type="text/javascript">
 		$(function() {
 			$('#query').click(function() {
-				$('#currentPage').val(1);
-				$('#currencyForm').submit();
-			});
-			$('#pagination').twbsPagination({
-				totalPages: ${pageResult.totalPage},
-				visiblePages:5,
-				startPage:${pageResult.pageNumber},
-				onPageClick:function(event,page){
-					$('#currentPage').val(page);
-					$('#currencyForm').submit();
-				}
+				$('#addSearchForm').submit();
 			});
 		})
 
@@ -80,17 +67,12 @@
 				<ul class="nav nav-sidebar">
 					<li class="active"><a href="list">股票列表 <span
 							class="sr-only">(current)</span></a></li>
-					<li><a href="currency/addSearch">新增股票</a></li>
+					<li><a href="addSearch">新增股票</a></li>
 				</ul>
 			</div>
 			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
-				<form id="currencyForm" action="list" class="form-inline"
+				<form id="addSearchForm" action="addSearch" class="form-inline"
 					style="margin-top: 30px;" method="post">
-					<input type="hidden" id="currentPage" name="qo.currentPage" value="" />
-					<div class="form-group" style="margin-left: 3%;">
-						<label for="exampleInputName2">股票名称</label> <input type="text"
-							class="form-control" id="exampleInputName" name="qo.name">
-					</div>
 					<div class="form-group" style="margin-left: 3%">
 						<label for="exampleInputEmail2">股票代码</label> <input type="text"
 							class="form-control" id="exampleInputEmail" name="qo.code">
@@ -108,25 +90,22 @@
 						</tr>
 					</thead>
 					<tbody>
-						<#if pageResult.list?size==0>
+						<#if cs?size==0>
 						<tr>
 							<td colspan="4">暂无数据...
 						</tr>
 
 						</#if>
-						<#list pageResult.list as p>
+						<#list cs as p>
 						<tr>
 							<td>${p_index+1}
 							<td>${p.name}
 							<td>${p.code}
-							<td><a class="btn btn-default" href="kline/charts?currencyId=${p.id}" role="button" target="_Blank">查看图表</a></td>
+							<td><a class="btn btn-default" href="add?code=${p.code}&name=${p.name}&currencyType=${p.currencyType}" role="button">下载数据</a></td>
 						</tr>
 						</#list>
 					</tbody>
 				</table>
-				<div style="text-align: center;">
-					<ul id="pagination" class="pagination-sm"></ul>
-				</div>
 			</div>
 		</div>
 	</div>

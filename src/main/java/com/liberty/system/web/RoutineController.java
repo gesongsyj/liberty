@@ -19,7 +19,7 @@ public class RoutineController extends BaseController implements Job {
 //		CurrencyController currencyController = new CurrencyController();
 //		currencyController.updateCurrency();
 		KlineController klineController = new KlineController();
-		klineController.downloadData();
+		klineController.downloadData(null);
 		klineController.createStroke();
 		klineController.createLine();
 	}

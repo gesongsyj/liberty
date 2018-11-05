@@ -180,7 +180,7 @@ public class KlineController extends BaseController {
 	 * 
 	 */
 	@Before(Tx.class)
-	public void downloadData() {
+	public void downloadData(String includeCurrencyCode) {
 //		DownLoader downLoader = new XlDownLoader();
 		DownLoader downLoader = new DfcfDownLoader();
 		List<Currency> listAll = Currency.dao.listAll();
@@ -198,9 +198,9 @@ public class KlineController extends BaseController {
 
 			for (Currency currency : listAll) {
 				// ===========测试
-//				if (!currency.getCode().equals("002113")) {
-//					continue;
-//				}
+				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+					continue;
+				}
 				// ===========
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
 				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));

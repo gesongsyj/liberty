@@ -22,7 +22,6 @@ import com.liberty.system.query.CurrencyQueryObject;
  * 登录管理
  */
 public class IndexController extends BaseController {
-
 	/**
 	 * 导向登陆界面
 	 */
@@ -40,13 +39,6 @@ public class IndexController extends BaseController {
 		redirect("/index.html");
 	}
 	
-	public void list(){
-		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
-		Page<Currency> paginate = Currency.dao.paginate(qo);
-		setAttr("pageResult", paginate);
-		render("currency/index.html");
-	}
-
 	/**
 	 * 用户登出
 	 */
@@ -88,7 +80,7 @@ public class IndexController extends BaseController {
 				logger.info("登陆账户：" + name + " 登陆IP：" + ip + "Port：" + port);
 				
 				getSession().setAttribute("account", account);
-				list();
+				redirect("/currency/list");
 //				renderJson(new ResultMsg(ResultStatusCode.OK, account));
 
 			} catch (AuthenticationException e) {

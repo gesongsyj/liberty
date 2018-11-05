@@ -97,10 +97,10 @@ public class CoreConfig extends JFinalConfig {
 	public void afterJFinalStart() {
 //		CurrencyController currencyController = new CurrencyController();
 //		currencyController.updateCurrency();
-		KlineController klineController = new KlineController();
-		klineController.downloadData();
-		klineController.createStroke();
-		klineController.createLine();
+//		KlineController klineController = new KlineController();
+//		klineController.downloadData(null);
+//		klineController.createStroke();
+//		klineController.createLine();
 	}
 
 }
