@@ -423,60 +423,59 @@ public class BaseController extends Controller {
 		Integer currencyId = strokes.get(0).getCurrencyId();
 		String type = strokes.get(0).getType();
 		int size = strokes.size();
-		double premax,premin;
-		if(lines.size()!=0) {
+		double premax, premin;
+		if (lines.size() != 0) {
 			premax = strokes.get(0).getMax();
 			premin = strokes.get(0).getMin();
-		}else {
+		} else {
 			premax = strokes.get(1).getMax();
 			premin = strokes.get(1).getMin();
 		}
-		outter:
-		for (int i = 0; i < size-3; i++) {
-			if(i==2 && "0".equals(strokes.get(i).getDirection())) {
-				//第一笔包含第三笔
-				if(strokes.get(i-2).getMax()>strokes.get(i).getMax()) {
-					premax=strokes.get(i).getMax();
-				}
-			}
-			if(i==2 && "1".equals(strokes.get(i).getDirection())) {
-				//第一笔包含第三笔
-				if(strokes.get(i-2).getMin()<strokes.get(i).getMin()) {
-					premin=strokes.get(i).getMin();
-				}
-			}
-			
-			//重新设置前最大最小值
-			if(strokes.get(i+2).getMax()>strokes.get(i).getMax()&& "0".equals(strokes.get(i).getDirection())) {
-				if (strokes.get(i).getMax() > premax ) {
+		outter: for (int i = 0; i < size - 3; i++) {
+			if (i == 2 && "0".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
+				// 第一笔包含第三笔
+				if (strokes.get(i - 2).getMax() > strokes.get(i).getMax()) {
 					premax = strokes.get(i).getMax();
 				}
 			}
-			if(strokes.get(i+2).getMin()<strokes.get(i).getMin() && "1".equals(strokes.get(i).getDirection())) {
-				if (strokes.get(i).getMin() < premin ) {
+			if (i == 2 && "1".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
+				// 第一笔包含第三笔
+				if (strokes.get(i - 2).getMin() < strokes.get(i).getMin()) {
 					premin = strokes.get(i).getMin();
 				}
 			}
-			
+
+			// 重新设置前最大最小值
+			if (strokes.get(i + 2).getMax() > strokes.get(i).getMax() && "0".equals(strokes.get(i).getDirection())) {
+				if (strokes.get(i).getMax() > premax) {
+					premax = strokes.get(i).getMax();
+				}
+			}
+			if (strokes.get(i + 2).getMin() < strokes.get(i).getMin() && "1".equals(strokes.get(i).getDirection())) {
+				if (strokes.get(i).getMin() < premin) {
+					premin = strokes.get(i).getMin();
+				}
+			}
+
 			// 找到分界点[顶]
 			if (strokes.get(i).getMax() > premax && strokes.get(i).getMax() > strokes.get(i + 2).getMax()
 					&& "0".equals(strokes.get(i).getDirection())) {
-				//1:笔破坏
-				if(strokes.get(i+1).getMin()<premax) {
-					//笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
+				// 1:笔破坏
+				if (strokes.get(i + 1).getMin() < premax) {
+					// 笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
 					Line tmpLine = new Line();
 					tmpLine.setEndDate(strokes.get(i).getEndDate());
 					tmpLine.setMax(strokes.get(i).getMax());
 					tmpLine.setDirection("0");
-					
+
 					if (lines.size() != 0) {
 						Line preLine = lines.get(lines.size() - 1);
-						//与前线段同向
-						if(tmpLine.getDirection().equals(preLine.getDirection())) {
+						// 与前线段同向
+						if (tmpLine.getDirection().equals(preLine.getDirection())) {
 							preLine.setEndDate(tmpLine.getEndDate());
 							preLine.setMax(tmpLine.getMax());
 							preLine.saveOrUpdate(currencyId, type);
-						}else {
+						} else {
 							tmpLine.setStartDate(preLine.getEndDate());
 							tmpLine.setMin(preLine.getMin());
 							preLine.saveOrUpdate(currencyId, type);
@@ -496,38 +495,38 @@ public class BaseController extends Controller {
 					}
 					Line preLine = lines.get(lines.size() - 1);
 					Line tmpLine2 = new Line();
-					tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
-					tmpLine2.setMax(strokes.get(i+1).getMax());
-					tmpLine2.setEndDate(strokes.get(i+3).getEndDate());
-					tmpLine2.setMin(strokes.get(i+3).getMin());
+					tmpLine2.setStartDate(strokes.get(i + 1).getStartDate());
+					tmpLine2.setMax(strokes.get(i + 1).getMax());
+					tmpLine2.setEndDate(strokes.get(i + 3).getEndDate());
+					tmpLine2.setMin(strokes.get(i + 3).getMin());
 					tmpLine2.setDirection("1");
 					tmpLine2.setPrevId(preLine.getId());
 					tmpLine2.saveOrUpdate(currencyId, type);
 					preLine.setNextId(tmpLine2.getId());
 					preLine.saveOrUpdate(currencyId, type);
 					lines.add(tmpLine2);
-					if(strokes.size()-1>i+3) {
-						List<Stroke> subList = strokes.subList(i+4, strokes.size());
+					if (strokes.size() - 1 > i + 3) {
+						List<Stroke> subList = strokes.subList(i + 4, strokes.size());
 						loopProcessLines3(subList, lines);
 					}
 					break;
 				}
-				//2:线段破坏
-				for (int j = i+1; j < size-1; j++) {
-					if(strokes.get(j).getMin()<premax) {
-						//线段破坏成立
+				// 2:线段破坏
+				for (int j = i + 1; j < size - 1; j++) {
+					if (strokes.get(j).getMin() < premax) {
+						// 线段破坏成立
 						Line tmpLine = new Line();
 						tmpLine.setEndDate(strokes.get(i).getEndDate());
 						tmpLine.setMax(strokes.get(i).getMax());
 						tmpLine.setDirection("0");
 						if (lines.size() != 0) {
 							Line preLine = lines.get(lines.size() - 1);
-							//与前线段同向
-							if(tmpLine.getDirection().equals(preLine.getDirection())) {
+							// 与前线段同向
+							if (tmpLine.getDirection().equals(preLine.getDirection())) {
 								preLine.setEndDate(tmpLine.getEndDate());
 								preLine.setMax(tmpLine.getMax());
 								preLine.saveOrUpdate(currencyId, type);
-							}else {
+							} else {
 								tmpLine.setStartDate(preLine.getEndDate());
 								tmpLine.setMin(preLine.getMin());
 								preLine.saveOrUpdate(currencyId, type);
@@ -545,8 +544,8 @@ public class BaseController extends Controller {
 						}
 						Line preLine = lines.get(lines.size() - 1);
 						Line tmpLine2 = new Line();
-						tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
-						tmpLine2.setMax(strokes.get(i+1).getMax());
+						tmpLine2.setStartDate(strokes.get(i + 1).getStartDate());
+						tmpLine2.setMax(strokes.get(i + 1).getMax());
 						tmpLine2.setEndDate(strokes.get(j).getEndDate());
 						tmpLine2.setMin(strokes.get(j).getMin());
 						tmpLine2.setDirection("1");
@@ -555,16 +554,16 @@ public class BaseController extends Controller {
 						preLine.setNextId(tmpLine2.getId());
 						preLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine2);
-						
-						if(strokes.size()-1>j) {
-							List<Stroke> subList = strokes.subList(j+1, strokes.size());
+
+						if (strokes.size() - 1 > j) {
+							List<Stroke> subList = strokes.subList(j + 1, strokes.size());
 							loopProcessLines3(subList, lines);
 						}
 						break outter;
 					}
-					if(strokes.get(j+1).getMax()>strokes.get(i).getMax()) {
-						premax=strokes.get(j+1).getMax();
-						i=j+1;
+					if (strokes.get(j + 1).getMax() > strokes.get(i).getMax()) {
+						premax = strokes.get(i).getMax();
+						i = j;
 						continue outter;
 					}
 					j++;
@@ -573,22 +572,22 @@ public class BaseController extends Controller {
 			// 找到分解点[底]
 			if (strokes.get(i).getMin() < premin && strokes.get(i).getMin() < strokes.get(i + 2).getMin()
 					&& "1".equals(strokes.get(i).getDirection())) {
-				//1:笔破坏
-				if(strokes.get(i+1).getMax()>premin) {
-					//笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
+				// 1:笔破坏
+				if (strokes.get(i + 1).getMax() > premin) {
+					// 笔破坏最终确认--先找分界点的情况下笔破坏是必定成立的
 					Line tmpLine = new Line();
 					tmpLine.setEndDate(strokes.get(i).getEndDate());
 					tmpLine.setMin(strokes.get(i).getMin());
 					tmpLine.setDirection("1");
-					
+
 					if (lines.size() != 0) {
 						Line preLine = lines.get(lines.size() - 1);
-						//与前线段同向
-						if(tmpLine.getDirection().equals(preLine.getDirection())) {
+						// 与前线段同向
+						if (tmpLine.getDirection().equals(preLine.getDirection())) {
 							preLine.setEndDate(tmpLine.getEndDate());
 							preLine.setMin(tmpLine.getMin());
 							preLine.saveOrUpdate(currencyId, type);
-						}else {
+						} else {
 							tmpLine.setStartDate(preLine.getEndDate());
 							tmpLine.setMax(preLine.getMax());
 							preLine.saveOrUpdate(currencyId, type);
@@ -608,39 +607,39 @@ public class BaseController extends Controller {
 					}
 					Line preLine = lines.get(lines.size() - 1);
 					Line tmpLine2 = new Line();
-					tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
-					tmpLine2.setMin(strokes.get(i+1).getMin());
-					tmpLine2.setEndDate(strokes.get(i+3).getEndDate());
-					tmpLine2.setMax(strokes.get(i+3).getMax());
+					tmpLine2.setStartDate(strokes.get(i + 1).getStartDate());
+					tmpLine2.setMin(strokes.get(i + 1).getMin());
+					tmpLine2.setEndDate(strokes.get(i + 3).getEndDate());
+					tmpLine2.setMax(strokes.get(i + 3).getMax());
 					tmpLine2.setDirection("0");
 					tmpLine2.setPrevId(preLine.getId());
 					tmpLine2.saveOrUpdate(currencyId, type);
 					preLine.setNextId(tmpLine2.getId());
 					preLine.saveOrUpdate(currencyId, type);
 					lines.add(tmpLine2);
-					
-					if(strokes.size()-1>i+3) {
-						List<Stroke> subList = strokes.subList(i+4, strokes.size());
+
+					if (strokes.size() - 1 > i + 3) {
+						List<Stroke> subList = strokes.subList(i + 4, strokes.size());
 						loopProcessLines3(subList, lines);
 					}
 					break;
 				}
-				//2:线段破坏
-				for (int j = i+1; j < size-1; j++) {
-					if(strokes.get(j).getMax()>premin) {
-						//线段破坏成立
+				// 2:线段破坏
+				for (int j = i + 1; j < size - 1; j++) {
+					if (strokes.get(j).getMax() > premin) {
+						// 线段破坏成立
 						Line tmpLine = new Line();
 						tmpLine.setEndDate(strokes.get(i).getEndDate());
 						tmpLine.setMin(strokes.get(i).getMin());
 						tmpLine.setDirection("1");
 						if (lines.size() != 0) {
 							Line preLine = lines.get(lines.size() - 1);
-							//与前线段同向
-							if(tmpLine.getDirection().equals(preLine.getDirection())) {
+							// 与前线段同向
+							if (tmpLine.getDirection().equals(preLine.getDirection())) {
 								preLine.setEndDate(tmpLine.getEndDate());
 								preLine.setMin(tmpLine.getMin());
 								preLine.saveOrUpdate(currencyId, type);
-							}else {
+							} else {
 								tmpLine.setStartDate(preLine.getEndDate());
 								tmpLine.setMax(preLine.getMax());
 								preLine.saveOrUpdate(currencyId, type);
@@ -658,8 +657,8 @@ public class BaseController extends Controller {
 						}
 						Line preLine = lines.get(lines.size() - 1);
 						Line tmpLine2 = new Line();
-						tmpLine2.setStartDate(strokes.get(i+1).getStartDate());
-						tmpLine2.setMin(strokes.get(i+1).getMin());
+						tmpLine2.setStartDate(strokes.get(i + 1).getStartDate());
+						tmpLine2.setMin(strokes.get(i + 1).getMin());
 						tmpLine2.setEndDate(strokes.get(j).getEndDate());
 						tmpLine2.setMax(strokes.get(j).getMax());
 						tmpLine2.setDirection("0");
@@ -668,16 +667,16 @@ public class BaseController extends Controller {
 						preLine.setNextId(tmpLine2.getId());
 						preLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine2);
-						
-						if(strokes.size()-1>j) {
-							List<Stroke> subList = strokes.subList(j+1, strokes.size());
+
+						if (strokes.size() - 1 > j) {
+							List<Stroke> subList = strokes.subList(j + 1, strokes.size());
 							loopProcessLines3(subList, lines);
 						}
 						break outter;
 					}
-					if(strokes.get(j+1).getMin()<strokes.get(i).getMin()) {
-						premin=strokes.get(j+1).getMin();
-						i=j+1;
+					if (strokes.get(j + 1).getMin() < strokes.get(i).getMin()) {
+						premin = strokes.get(i).getMin();
+						i = j;
 						continue outter;
 					}
 					j++;

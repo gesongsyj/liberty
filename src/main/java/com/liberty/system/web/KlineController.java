@@ -82,6 +82,7 @@ public class KlineController extends BaseController {
 			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
 			return;
 		}
+		Currency currency =Currency.dao.findByCode(code);
 		List<Kline> allKlines=Kline.dao.listAllByCode(code, "k");
 		List<Stroke> allStrokes=Stroke.dao.listAllByCode(code, "k");
 		List<Line> allLines=Line.dao.listAllByCode(code, "k");
@@ -165,7 +166,8 @@ public class KlineController extends BaseController {
 			lineStrokes.add(strokeLineNums);
 		}
 		
-		Map<String, List> resultMap=new HashMap<String, List>();
+		Map<String, Object> resultMap=new HashMap<String, Object>();
+		resultMap.put("currency", currency);
 		resultMap.put("klines", klines);
 		resultMap.put("strokes", strokes);
 		resultMap.put("lines", lines);

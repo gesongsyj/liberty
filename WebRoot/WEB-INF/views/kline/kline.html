@@ -47,6 +47,9 @@
 			data0 = splitData(klines);
 			// 填入数据
 			myChart.setOption({
+				title : {
+					text : data.p2pdata.currency.name + ':K线图'
+				},
 				xAxis : [ {
 					data : data0.categoryData
 				}, {
