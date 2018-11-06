@@ -127,9 +127,9 @@
 							</#if>
 							<td><a class="btn btn-primary" href="../kline/charts?currencyId=${p.id}" role="button" target="_Blank">查看图表</a>
 								<#if (p.followed)?? && p.followed>
-									<a class="btn btn-danger" href="../currency/addFollow?currencyId=${p.id}&followed=false" role="button">取消标记</a>
+									<a class="btn btn-danger" href="../currency/addFollow?currencyId=${p.id}&followed=false&qo.currentPage=${qo.currentPage}" role="button">取消标记</a>
 								<#else>
-									<a class="btn btn-success" href="../currency/addFollow?currencyId=${p.id}&followed=true" role="button">添加标记</a>
+									<a class="btn btn-success" href="../currency/addFollow?currencyId=${p.id}&followed=true&qo.currentPage=${qo.currentPage}" role="button">添加标记</a>
 								</#if>
 							</td>
 						

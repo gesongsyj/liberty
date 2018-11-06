@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresUser;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.jfinal.aop.Before;
@@ -37,18 +40,20 @@ public class CurrencyController extends BaseController {
 	}
 
 	public void addFollow() {
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
 		String followed=paras.get("followed");
 		Currency currency = Currency.dao.findById(currencyId);
 		currency.setFollowed(Boolean.valueOf(followed));
 		currency.update();
-		redirect("/currency/list");
+		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
 	}
 	
 	public void list() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		Page<Currency> paginate = Currency.dao.paginate(qo);
 		setAttr("pageResult", paginate);
+		setAttr("qo", qo);
 		render("index.html");
 	}
 

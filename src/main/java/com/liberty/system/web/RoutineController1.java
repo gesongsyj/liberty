@@ -11,7 +11,7 @@ import com.liberty.common.web.BaseController;
 /**
  * 定时任务
  */
-public class RoutineController extends BaseController implements Job {
+public class RoutineController1 extends BaseController implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context)

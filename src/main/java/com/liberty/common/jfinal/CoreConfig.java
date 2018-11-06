@@ -15,15 +15,16 @@ import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
 import com.liberty.common.interceptor.CoreInterceptor;
+import com.liberty.common.interceptor.ShiroInterceptor;
 import com.liberty.common.jfinal._MappingKit;
 import com.liberty.system.web.CurrencyController;
 import com.liberty.system.web.KlineController;
 
 import cn.dreampie.quartz.QuartzPlugin;
+import cn.dreampie.shiro.core.ShiroPlugin;
 import net.dreamlu.event.EventPlugin;
 
 public class CoreConfig extends JFinalConfig {
-
 	@Override
 	public void configConstant(Constants me) {
 		loadPropertyFile("jfinal.properties");
@@ -35,7 +36,6 @@ public class CoreConfig extends JFinalConfig {
 	@Override
 	public void configRoute(Routes me) {
 		me.add(new CoreRoutes());
-		me.setBaseViewPath("/WEB-INF/views/");
 	}
 
 	@Override
@@ -79,6 +79,7 @@ public class CoreConfig extends JFinalConfig {
 
 	@Override
 	public void configInterceptor(Interceptors me) {
+		me.add(new ShiroInterceptor());
 		me.add(new Tx());
 		me.add(new CoreInterceptor());
 	}

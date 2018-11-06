@@ -1049,9 +1049,9 @@ public class BaseController extends Controller {
 								lastStroke.saveOrUpdate(code, type);// =================
 
 								// 设置卖点
-								if (i == klines.size() - 3) {
-									currency.setSalePoint(true);
-								}
+//								if (i == klines.size() - 3) {
+//									currency.setSalePoint(true);
+//								}
 							}
 						}
 					} else {
@@ -1081,9 +1081,9 @@ public class BaseController extends Controller {
 									strokeStartIndex = i + 1;
 
 									// 设置卖点
-									if (i == klines.size() - 3) {
-										currency.setSalePoint(true);
-									}
+//									if (i == klines.size() - 3) {
+//										currency.setSalePoint(true);
+//									}
 
 								} else {
 									continue;
@@ -1117,9 +1117,9 @@ public class BaseController extends Controller {
 							strokeStartIndex = i + 1;
 
 							// 设置卖点
-							if (i == klines.size() - 3) {
-								currency.setSalePoint(true);
-							}
+//							if (i == klines.size() - 3) {
+//								currency.setSalePoint(true);
+//							}
 						}
 					}
 
@@ -1149,9 +1149,9 @@ public class BaseController extends Controller {
 								lastStroke.saveOrUpdate(code, type);// =================
 
 								// 设置买点
-								if (i == klines.size() - 3) {
-									currency.setBuyPoint(true);
-								}
+//								if (i == klines.size() - 3) {
+//									currency.setBuyPoint(true);
+//								}
 							}
 						}
 					} else {
@@ -1181,9 +1181,9 @@ public class BaseController extends Controller {
 									strokeStartIndex = i + 1;
 
 									// 设置买点
-									if (i == klines.size() - 3) {
-										currency.setBuyPoint(true);
-									}
+//									if (i == klines.size() - 3) {
+//										currency.setBuyPoint(true);
+//									}
 								} else {
 									continue;
 								}
@@ -1216,9 +1216,9 @@ public class BaseController extends Controller {
 							strokeStartIndex = i + 1;
 
 							// 设置买点
-							if (i == klines.size() - 3) {
-								currency.setBuyPoint(true);
-							}
+//							if (i == klines.size() - 3) {
+//								currency.setBuyPoint(true);
+//							}
 						}
 					}
 				}

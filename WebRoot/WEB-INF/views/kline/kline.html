@@ -123,50 +123,6 @@
 		};
 		
 		fetchData('k');
-		/* // 异步加载数据
-		$.get('fetchData?code=${code}').done(function(data) {
-			// 填入数据
-			klines = data.p2pdata.klines;
-			strokes = data.p2pdata.strokes;
-			lines = data.p2pdata.lines;
-			lineStrokes = data.p2pdata.lineStrokes
-			data0 = splitData(klines);
-			// 填入数据
-			myChart.setOption({
-				title : {
-					text : data.p2pdata.currency.name + ':K线图'
-				},
-				xAxis : [ {
-					data : data0.categoryData
-				}, {
-					data : data0.categoryData
-				} ],
-				series : [ {
-					data : data0.values,
-				}, {
-					data : calculateMA(5),
-				}, {
-					data : calculateMA(10),
-				}, {
-					data : calculateMA(20),
-				}, {
-					data : calculateMA(30),
-				}, {
-					data : strokes,
-				}, {
-					markLine : {
-						data : lines,
-					},
-					data : lineStrokes,
-				}, {
-					data : data0.macds,
-				}, {
-					data : data0.difs
-				}, {
-					data : data0.deas
-				} ]
-			});
-		}); */
 
 		function splitData(rawData) {
 			var categoryData = [];
