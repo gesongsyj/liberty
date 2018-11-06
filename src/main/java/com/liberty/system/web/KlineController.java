@@ -110,15 +110,17 @@ public class KlineController extends BaseController {
 			}else {
 				strokeNums.add(allStrokes.get(i).getMax());
 			}
-			if(i==allStrokes.size()-1) {
-				strokeNums.add(allStrokes.get(i).getEndDate());
-				if("0".equals(allStrokes.get(i).getDirection())) {
-					strokeNums.add(allStrokes.get(i).getMax());
-				}else {
-					strokeNums.add(allStrokes.get(i).getMin());
-				}
-			}
 			strokes.add(strokeNums);
+			if(i==allStrokes.size()-1) {
+				List<Object> strokeNums2= new ArrayList<Object>();
+				strokeNums2.add(allStrokes.get(i).getEndDate());
+				if("0".equals(allStrokes.get(i).getDirection())) {
+					strokeNums2.add(allStrokes.get(i).getMax());
+				}else {
+					strokeNums2.add(allStrokes.get(i).getMin());
+				}
+				strokes.add(strokeNums2);
+			}
 		}
 		
 		List<List<Map<String, Object>>> lines=new ArrayList<List<Map<String, Object>>>();

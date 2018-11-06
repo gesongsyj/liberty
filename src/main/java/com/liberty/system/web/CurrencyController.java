@@ -28,7 +28,6 @@ import com.liberty.system.service.impl.CurrencyKit_Gp;
 import com.liberty.system.service.impl.CurrencyKit_Wh;
 
 public class CurrencyController extends BaseController {
-
 	@Before(Tx.class)
 	public void updateCurrency() {
 //		CurrencyKit currency=new CurrencyKit_Wh();
@@ -37,6 +36,15 @@ public class CurrencyController extends BaseController {
 		renderText("ok");
 	}
 
+	public void addFollow() {
+		String currencyId = paras.get("currencyId");
+		String followed=paras.get("followed");
+		Currency currency = Currency.dao.findById(currencyId);
+		currency.setFollowed(Boolean.valueOf(followed));
+		currency.update();
+		redirect("/currency/list");
+	}
+	
 	public void list() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		Page<Currency> paginate = Currency.dao.paginate(qo);
