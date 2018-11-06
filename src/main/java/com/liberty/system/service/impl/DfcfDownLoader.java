@@ -45,7 +45,12 @@ public class DfcfDownLoader implements DownLoader {
 		List<Kline> klines = new ArrayList<Kline>();
 		for (String s : dataArr) {
 			String[] str = s.split(",");
-			Date date = DateUtil.strDate(str[0], "yyyy-MM-dd");
+			Date date=null;
+			if(str[0].contains(" ")) {
+				date = DateUtil.strDate(str[0], "yyyy-MM-dd HH:mm");
+			}else {
+				date = DateUtil.strDate(str[0], "yyyy-MM-dd");
+			}
 			Kline kline = new Kline();
 			kline.setDate(date);
 			kline.setOpen(Double.valueOf(str[1]));

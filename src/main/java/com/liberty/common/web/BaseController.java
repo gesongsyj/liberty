@@ -487,9 +487,9 @@ public class BaseController extends Controller {
 						}
 					} else {
 						tmpLine.setStartDate(strokes.get(0).getStartDate());
-						tmpLine.setMin(strokes.get(0).getMin());//
-						tmpLine.setEndDate(strokes.get(i).getEndDate());
-						tmpLine.setMax(strokes.get(i).getMax());
+						tmpLine.setMin("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
+//						tmpLine.setEndDate(strokes.get(i).getEndDate());
+//						tmpLine.setMax(strokes.get(i).getMax());
 						tmpLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine);
 					}
@@ -599,9 +599,9 @@ public class BaseController extends Controller {
 						}
 					} else {
 						tmpLine.setStartDate(strokes.get(0).getStartDate());
-						tmpLine.setMax(strokes.get(0).getMax());
-						tmpLine.setEndDate(strokes.get(i).getEndDate());
-						tmpLine.setMin(strokes.get(i).getMin());
+						tmpLine.setMax("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
+//						tmpLine.setEndDate(strokes.get(i).getEndDate());
+//						tmpLine.setMin(strokes.get(i).getMin());
 						tmpLine.saveOrUpdate(currencyId, type);
 						lines.add(tmpLine);
 					}
@@ -651,7 +651,7 @@ public class BaseController extends Controller {
 							}
 						} else {
 							tmpLine.setStartDate(strokes.get(0).getStartDate());
-							tmpLine.setMax(strokes.get(0).getMax());
+							tmpLine.setMax("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
 							tmpLine.saveOrUpdate(currencyId, type);
 							lines.add(tmpLine);
 						}
@@ -1046,7 +1046,7 @@ public class BaseController extends Controller {
 								Stroke lastStroke = strokes.get(strokes.size() - 1);
 								lastStroke.setMax(shape.getMax());
 								lastStroke.setEndDate(shape.getDate());
-								lastStroke.update(code, type);// =================
+								lastStroke.saveOrUpdate(code, type);// =================
 
 								// 设置卖点
 								if (i == klines.size() - 3) {
@@ -1073,9 +1073,9 @@ public class BaseController extends Controller {
 									gapStroke.setDirection("0");
 									gapStroke.setPrevId(lastStroke.getId());
 									gapStroke.setFromGap(true);
-									gapStroke.save(code, type);// =================
+									gapStroke.saveOrUpdate(code, type);// =================
 									lastStroke.setNextId(gapStroke.getId());
-									lastStroke.update(code, type);// =================
+									lastStroke.saveOrUpdate(code, type);// =================
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
@@ -1108,9 +1108,9 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);// ===========
+							stroke.saveOrUpdate(code, type);// ===========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);// =================
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).saveOrUpdate(code, type);// =================
 							}
 							strokes.add(stroke);
 							index = i + 1;
@@ -1146,7 +1146,7 @@ public class BaseController extends Controller {
 								Stroke lastStroke = strokes.get(strokes.size() - 1);
 								lastStroke.setMin(shape.getMin());
 								lastStroke.setEndDate(shape.getDate());
-								lastStroke.update(code, type);// =================
+								lastStroke.saveOrUpdate(code, type);// =================
 
 								// 设置买点
 								if (i == klines.size() - 3) {
@@ -1173,9 +1173,9 @@ public class BaseController extends Controller {
 									gapStroke.setDirection("1");
 									gapStroke.setPrevId(lastStroke.getId());
 									gapStroke.setFromGap(true);
-									gapStroke.save(code, type);// ============
+									gapStroke.saveOrUpdate(code, type);// ============
 									lastStroke.setNextId(gapStroke.getId());
-									lastStroke.update(code, type);// =================
+									lastStroke.saveOrUpdate(code, type);// =================
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
@@ -1207,9 +1207,9 @@ public class BaseController extends Controller {
 							if (strokes.size() != 0) {
 								stroke.setPrevId(strokes.get(strokes.size() - 1).getId());
 							}
-							stroke.save(code, type);// ==========
+							stroke.saveOrUpdate(code, type);// ==========
 							if (strokes.size() != 0) {
-								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).update(code, type);// =================
+								strokes.get(strokes.size() - 1).setNextId(stroke.getId()).saveOrUpdate(code, type);// =================
 							}
 							strokes.add(stroke);
 							index = i + 1;

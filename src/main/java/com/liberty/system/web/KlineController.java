@@ -78,14 +78,15 @@ public class KlineController extends BaseController {
 	
 	public void fetchData() {
 		String code = paras.get("code");
+		String kType=paras.containsKey("kType")?paras.get("kType"):"k";
 		if(code==null) {
 			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
 			return;
 		}
 		Currency currency =Currency.dao.findByCode(code);
-		List<Kline> allKlines=Kline.dao.listAllByCode(code, "k");
-		List<Stroke> allStrokes=Stroke.dao.listAllByCode(code, "k");
-		List<Line> allLines=Line.dao.listAllByCode(code, "k");
+		List<Kline> allKlines=Kline.dao.listAllByCode(code, kType);
+		List<Stroke> allStrokes=Stroke.dao.listAllByCode(code, kType);
+		List<Line> allLines=Line.dao.listAllByCode(code, kType);
 		
 		List<List<Object>> klines=new ArrayList<List<Object>>();
 		for (int i = 0; i < allKlines.size(); i++) {
@@ -193,13 +194,12 @@ public class KlineController extends BaseController {
 		Map<String, Kline> lastKlineMap = new HashMap<String, Kline>();
 		for (Record record : klineType) {
 			// ================测试
-			if (!record.getStr("key").equals("k")) {
-				continue;
-			}
+//			if (!record.getStr("key").equals("k")) {
+//				continue;
+//			}
 			// ================
 
 			for (Currency currency : listAll) {
-				// ===========测试
 				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
 					continue;
 				}
@@ -239,30 +239,39 @@ public class KlineController extends BaseController {
 	@Before(Tx.class)
 	public void createStroke() {
 		List<Currency> listAll = Currency.dao.listAll();
-		for (Currency currency : listAll) {
-			Stroke lastStroke = Stroke.dao.getLastByCode(currency.getCode(),"k");
-			
-			if (lastStroke == null) {
-				// 查询所有的K线
-				List<Kline> klines = Kline.dao.listAllByCode(currency.getCode(), "k");
-				if(klines==null || klines.size()==0) {
-					continue;
+		String sql = "select * from dictionary where type='klineType_gp'";
+		List<Record> klineType = Db.find(sql);
+		for (Record record : klineType) {
+			// ================测试
+//			if (!record.getStr("key").equals("k")) {
+//				continue;
+//			}
+			System.out.println(record);
+			for (Currency currency : listAll) {
+				Stroke lastStroke = Stroke.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+				
+				if (lastStroke == null) {
+					// 查询所有的K线
+					List<Kline> klines = Kline.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+					if(klines==null || klines.size()==0) {
+						continue;
+					}
+					// 处理K线的包含关系
+					List<Kline> handleInclude = handleInclude(klines, lastStroke);
+					// 生成笔
+					List<Stroke> strokes = processStrokes(handleInclude, lastStroke);
+				} else {
+					// 查询最后一笔之后的K线
+					Date date = lastStroke.getEndDate();
+					List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+					if(klines==null|| klines.size()==0) {
+						continue;
+					}
+					// 处理K线的包含关系
+					List<Kline> handleInclude = handleInclude(klines, lastStroke);
+					// 生成笔
+					List<Stroke> strokes = processStrokes(handleInclude, lastStroke);
 				}
-				// 处理K线的包含关系
-				List<Kline> handleInclude = handleInclude(klines, lastStroke);
-				// 生成笔
-				List<Stroke> strokes = processStrokes(handleInclude, lastStroke);
-			} else {
-				// 查询最后一笔之后的K线
-				Date date = lastStroke.getEndDate();
-				List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", date);
-				if(klines==null|| klines.size()==0) {
-					continue;
-				}
-				// 处理K线的包含关系
-				List<Kline> handleInclude = handleInclude(klines, lastStroke);
-				// 生成笔
-				List<Stroke> strokes = processStrokes(handleInclude, lastStroke);
 			}
 		}
 		
@@ -274,27 +283,35 @@ public class KlineController extends BaseController {
 		List<Stroke> strokes=null;
 		
 		List<Currency> listAll = Currency.dao.listAll();
-		for (Currency currency : listAll) {
-			List<Line> storeLines=new ArrayList<Line>();//生成的线段
-			Line lastLine = Line.dao.getLastByCode(currency.getCode(),"k");
-			
-			if (lastLine == null) {
-				// 查询所有的笔
-				strokes = Stroke.dao.listAllByCode(currency.getCode(), "k");
-				if(strokes==null|| strokes.size()==0) {
-					continue;
+		String sql = "select * from dictionary where type='klineType_gp'";
+		List<Record> klineType = Db.find(sql);
+		for (Record record : klineType) {
+			// ================测试
+//			if (!record.getStr("key").equals("k")) {
+//				continue;
+//			}
+			for (Currency currency : listAll) {
+				List<Line> storeLines=new ArrayList<Line>();//生成的线段
+				Line lastLine = Line.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+				
+				if (lastLine == null) {
+					// 查询所有的笔
+					strokes = Stroke.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+					if(strokes==null|| strokes.size()==0) {
+						continue;
+					}
+				} else {
+					storeLines.add(lastLine);
+					// 查询最后一条线段后的笔
+					Date date = lastLine.getEndDate();
+					strokes = Stroke.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+					if(strokes==null|| strokes.size()==0) {
+						continue;
+					}
 				}
-			} else {
-				storeLines.add(lastLine);
-				// 查询最后一条线段后的笔
-				Date date = lastLine.getEndDate();
-				strokes = Stroke.dao.getListByDate(currency.getCode(), "k", date);
-				if(strokes==null|| strokes.size()==0) {
-					continue;
+				if(strokes.size()>=3) {
+					loopProcessLines3(strokes,storeLines);
 				}
-			}
-			if(strokes.size()>=3) {
-				loopProcessLines3(strokes,storeLines);
 			}
 		}
 		

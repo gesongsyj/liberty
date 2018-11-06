@@ -39,6 +39,14 @@ public class Stroke extends BaseStroke<Stroke> {
 		allKlines.clear();
 	}
 	
+	public boolean saveOrUpdate(String code,String type) {
+		if(this.getId()!=null) {
+			return update(code,type);
+		}else {
+			return save(code, type);
+		}
+	}
+	
 	public boolean update(String code,String type) {
 		try {
 			super.update();
