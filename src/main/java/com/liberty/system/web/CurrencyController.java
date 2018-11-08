@@ -22,6 +22,7 @@ import com.liberty.common.utils.JsonToMap;
 import com.liberty.common.utils.ResultMsg;
 import com.liberty.common.utils.ResultStatusCode;
 import com.liberty.common.web.BaseController;
+import com.liberty.system.model.Account;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.query.CurrencyQueryObject;
@@ -31,6 +32,9 @@ import com.liberty.system.service.impl.CurrencyKit_Gp;
 import com.liberty.system.service.impl.CurrencyKit_Wh;
 
 public class CurrencyController extends BaseController {
+	/**
+	 * 抓取财经网站深证,沪证涨幅排行榜前n位的股票添加到数据库
+	 */
 	@Before(Tx.class)
 	public void updateCurrency() {
 //		CurrencyKit currency=new CurrencyKit_Wh();
@@ -39,6 +43,9 @@ public class CurrencyController extends BaseController {
 		renderText("ok");
 	}
 
+	/**
+	 * 对该股添加标记,后续可能有期望的走势出现
+	 */
 	public void addFollow() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
@@ -49,6 +56,9 @@ public class CurrencyController extends BaseController {
 		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
 	}
 	
+	/**
+	 * 数据库已有股票的分页查询
+	 */
 	public void list() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		Page<Currency> paginate = Currency.dao.paginate(qo);
@@ -57,6 +67,9 @@ public class CurrencyController extends BaseController {
 		render("index.html");
 	}
 
+	/**
+	 * 数据库中暂时没有的股票希望添加至数据库
+	 */
 	public void addSearch() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String keyword=qo.getKeyword();
@@ -90,6 +103,9 @@ public class CurrencyController extends BaseController {
 		render("add.html");
 	}
 
+	/**
+	 * 确认添加该股至数据库,从财经网站爬取k线数据,生成笔和线段
+	 */
 	public void add() {
 //		if (!paras.containsKey("code") || !paras.containsKey("name") || !paras.containsKey("currencyType")) {
 //			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
@@ -114,8 +130,8 @@ public class CurrencyController extends BaseController {
 
 		KlineController klineController = new KlineController();
 		klineController.downloadData(c.getCode());
-		klineController.createStroke();
-		klineController.createLine();
+		klineController.createStroke(c.getCode());
+		klineController.createLine(c.getCode());
 		list();
 	}
 }

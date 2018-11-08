@@ -65,6 +65,22 @@ public class KlineController extends BaseController {
 		System.err.println(a);
 	}
 
+	/**
+	 * 更新该股的k线,笔,线段数据
+	 */
+	public void updateData() {
+		String code = paras.get("code");
+		KlineController klineController = new KlineController();
+		klineController.downloadData(code);
+		klineController.createStroke(code);
+		klineController.createLine(code);
+		setAttr("code", code);
+		render("kline.html");
+	}
+	
+	/**
+	 * 查看k线,笔,线段图表
+	 */
 	public void charts() {
 		String currencyId = paras.get("currencyId");
 		if(currencyId==null) {
@@ -76,6 +92,9 @@ public class KlineController extends BaseController {
 		render("kline.html");
 	}
 	
+	/**
+	 * 获取图表数据
+	 */
 	public void fetchData() {
 		String code = paras.get("code");
 		String kType=paras.containsKey("kType")?paras.get("kType"):"k";
@@ -180,7 +199,7 @@ public class KlineController extends BaseController {
 	
 	/**
 	 * K线数据下载
-	 * 
+	 * 财经网站爬取数据
 	 */
 	@Before(Tx.class)
 	public void downloadData(String includeCurrencyCode) {
@@ -236,8 +255,12 @@ public class KlineController extends BaseController {
 		renderText("ok");
 	}
 
+	/**
+	 * 根据k线数据生成笔
+	 * @param includeCurrencyCode
+	 */
 	@Before(Tx.class)
-	public void createStroke() {
+	public void createStroke(String includeCurrencyCode) {
 		List<Currency> listAll = Currency.dao.listAll();
 		String sql = "select * from dictionary where type='klineType_gp'";
 		List<Record> klineType = Db.find(sql);
@@ -248,6 +271,9 @@ public class KlineController extends BaseController {
 //			}
 			System.out.println(record);
 			for (Currency currency : listAll) {
+				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+					continue;
+				}
 				Stroke lastStroke = Stroke.dao.getLastByCode(currency.getCode(),record.getStr("key"));
 				
 				if (lastStroke == null) {
@@ -278,8 +304,12 @@ public class KlineController extends BaseController {
 		renderText("ok");
 	}
 
+	/**
+	 * 根据笔数据生成线段
+	 * @param includeCurrencyCode
+	 */
 	@Before(Tx.class)
-	public void createLine() {
+	public void createLine(String includeCurrencyCode) {
 		List<Stroke> strokes=null;
 		
 		List<Currency> listAll = Currency.dao.listAll();
@@ -291,6 +321,9 @@ public class KlineController extends BaseController {
 //				continue;
 //			}
 			for (Currency currency : listAll) {
+				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+					continue;
+				}
 				List<Line> storeLines=new ArrayList<Line>();//生成的线段
 				Line lastLine = Line.dao.getLastByCode(currency.getCode(),record.getStr("key"));
 				

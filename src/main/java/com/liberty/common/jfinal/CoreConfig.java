@@ -7,6 +7,7 @@ import com.jfinal.config.JFinalConfig;
 import com.jfinal.config.Plugins;
 import com.jfinal.config.Routes;
 import com.jfinal.core.JFinal;
+import com.jfinal.ext.interceptor.SessionInViewInterceptor;
 import com.jfinal.kit.PathKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.activerecord.OrderedFieldContainerFactory;
@@ -82,6 +83,7 @@ public class CoreConfig extends JFinalConfig {
 		me.add(new ShiroInterceptor());
 		me.add(new Tx());
 		me.add(new CoreInterceptor());
+		me.add(new SessionInViewInterceptor());
 	}
 
 	@Override
@@ -100,8 +102,8 @@ public class CoreConfig extends JFinalConfig {
 //		currencyController.updateCurrency();
 //		KlineController klineController = new KlineController();
 //		klineController.downloadData(null);
-//		klineController.createStroke();
-//		klineController.createLine();
+//		klineController.createStroke(null);
+//		klineController.createLine(null);
 	}
 
 }

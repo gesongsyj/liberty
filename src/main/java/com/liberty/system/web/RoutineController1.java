@@ -13,6 +13,9 @@ import com.liberty.common.web.BaseController;
  */
 public class RoutineController1 extends BaseController implements Job {
 
+	/**
+	 * 定时更新数据库中已有股票的数据,半天或者一天左右更新一次
+	 */
 	@Override
 	public void execute(JobExecutionContext context)
 			throws JobExecutionException {
@@ -20,8 +23,8 @@ public class RoutineController1 extends BaseController implements Job {
 //		currencyController.updateCurrency();
 		KlineController klineController = new KlineController();
 		klineController.downloadData(null);
-		klineController.createStroke();
-		klineController.createLine();
+		klineController.createStroke(null);
+		klineController.createLine(null);
 	}
 	
 }
