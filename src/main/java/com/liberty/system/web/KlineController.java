@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -217,14 +220,18 @@ public class KlineController extends BaseController {
 //				continue;
 //			}
 			// ================
-
-			for (Currency currency : listAll) {
-				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
-					continue;
-				}
+			
+//			for (Currency currency : listAll) {
+//				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+//					continue;
+//				}
+				//多线程机制
+				Currency currency = Currency.dao.findByCode(includeCurrencyCode);
 				// ===========
 				// 取出最后两条数据,最新的一条数据可能随时变化,新增数据时此条记录先删除
-				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
+//				List<Kline> lastTwo = Kline.dao.getLastByCode(currency.getCode(), record.getStr("key"));
+				//多线程机制
+				List<Kline> lastTwo = Kline.dao.getLastByCode(includeCurrencyCode, record.getStr("key"));
 
 				Kline lastKline = null;
 				if (lastTwo == null || lastTwo.size() <= 1) {
@@ -234,7 +241,9 @@ public class KlineController extends BaseController {
 				} else {
 					lastTwo.get(0).delete();
 					lastKline = lastTwo.get(1);
-					lastKlineMap.put(currency.getCode() + "_" + record.getStr("key"), lastKline);
+//					lastKlineMap.put(currency.getCode() + "_" + record.getStr("key"), lastKline);
+					//多线程机制
+					lastKlineMap.put(includeCurrencyCode + "_" + record.getStr("key"), lastKline);
 				}
 				List<Kline> klineList = null;
 				klineList = downLoader.downLoad(currency, record.getStr("key"), "get", lastKline);
@@ -250,7 +259,7 @@ public class KlineController extends BaseController {
 				Kline.dao.saveMany(klineMap, lastKlineMap);
 				klineMap.clear();
 				lastKlineMap.clear();
-			}
+//			}
 		}
 		renderText("ok");
 	}
@@ -270,15 +279,19 @@ public class KlineController extends BaseController {
 //				continue;
 //			}
 			System.out.println(record);
-			for (Currency currency : listAll) {
-				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
-					continue;
-				}
-				Stroke lastStroke = Stroke.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+//			for (Currency currency : listAll) {
+//				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+//					continue;
+//				}
+//				Stroke lastStroke = Stroke.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+				//用多线程机制
+				Stroke lastStroke = Stroke.dao.getLastByCode(includeCurrencyCode,record.getStr("key"));
 				
 				if (lastStroke == null) {
 					// 查询所有的K线
-					List<Kline> klines = Kline.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+//					List<Kline> klines = Kline.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+					//用多线程机制
+					List<Kline> klines = Kline.dao.listAllByCode(includeCurrencyCode, record.getStr("key"));
 					if(klines==null || klines.size()==0) {
 						continue;
 					}
@@ -289,7 +302,9 @@ public class KlineController extends BaseController {
 				} else {
 					// 查询最后一笔之后的K线
 					Date date = lastStroke.getEndDate();
-					List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+//					List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+					//用多线程机制
+					List<Kline> klines = Kline.dao.getListByDate(includeCurrencyCode, record.getStr("key"), date);
 					if(klines==null|| klines.size()==0) {
 						continue;
 					}
@@ -298,7 +313,7 @@ public class KlineController extends BaseController {
 					// 生成笔
 					List<Stroke> strokes = processStrokes(handleInclude, lastStroke);
 				}
-			}
+//			}
 		}
 		
 		renderText("ok");
@@ -320,16 +335,20 @@ public class KlineController extends BaseController {
 //			if (!record.getStr("key").equals("k")) {
 //				continue;
 //			}
-			for (Currency currency : listAll) {
-				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
-					continue;
-				}
+//			for (Currency currency : listAll) {
+//				if (includeCurrencyCode !=null && !currency.getCode().equals(includeCurrencyCode)) {
+//					continue;
+//				}
 				List<Line> storeLines=new ArrayList<Line>();//生成的线段
-				Line lastLine = Line.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+//				Line lastLine = Line.dao.getLastByCode(currency.getCode(),record.getStr("key"));
+				//用多线程机制
+				Line lastLine = Line.dao.getLastByCode(includeCurrencyCode,record.getStr("key"));
 				
 				if (lastLine == null) {
 					// 查询所有的笔
-					strokes = Stroke.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+//					strokes = Stroke.dao.listAllByCode(currency.getCode(), record.getStr("key"));
+					//用多线程机制
+					strokes = Stroke.dao.listAllByCode(includeCurrencyCode, record.getStr("key"));
 					if(strokes==null|| strokes.size()==0) {
 						continue;
 					}
@@ -337,17 +356,41 @@ public class KlineController extends BaseController {
 					storeLines.add(lastLine);
 					// 查询最后一条线段后的笔
 					Date date = lastLine.getEndDate();
-					strokes = Stroke.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+//					strokes = Stroke.dao.getListByDate(currency.getCode(), record.getStr("key"), date);
+					//用多线程机制
+					strokes = Stroke.dao.getListByDate(includeCurrencyCode, record.getStr("key"), date);
 					if(strokes==null|| strokes.size()==0) {
 						continue;
+					}
+					//最后一笔的结束点有变动,最后一条线段的结束点未变
+					if(0!=strokes.get(0).getStartDate().compareTo(lastLine.getEndDate())) {
+						lastLine.setEndDate(strokes.get(0).getEndDate()).update();
+						strokes.remove(0);
 					}
 				}
 				if(strokes.size()>=3) {
 					loopProcessLines3(strokes,storeLines);
 				}
-			}
+//			}
 		}
 		
 	}
-
+	
+	/**
+	 * 多线程下载 处理数据
+	 */
+	public void multiProData() {
+		ExecutorService threadPool = Executors.newFixedThreadPool(20);
+		List<Currency> listAll = Currency.dao.listAll();
+		for (Currency currency : listAll) {
+			threadPool.execute(new Runnable() {
+				@Override
+				public void run() {
+					downloadData(currency.getCode());
+					createStroke(currency.getCode());
+					createLine(currency.getCode());
+				}
+			});
+		}
+	}
 }

@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
@@ -133,5 +134,17 @@ public class CurrencyController extends BaseController {
 		klineController.createStroke(c.getCode());
 		klineController.createLine(c.getCode());
 		list();
+	}
+	
+	public  void delete() {
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
+		String currencyId = paras.get("currencyId");
+		Db.update("delete from kline where currencyId=?", currencyId);
+		Db.update("UPDATE stroke SET prevId =null,nextId=null where currencyId=?", currencyId);
+		Db.update("delete from stroke where currencyId=?", currencyId);
+		Db.update("UPDATE line SET prevId =null,nextId=null where currencyId=?", currencyId);
+		Db.update("delete from line where currencyId=?", currencyId);
+		Db.update("delete from currency where id=?",currencyId);
+		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
 	}
 }

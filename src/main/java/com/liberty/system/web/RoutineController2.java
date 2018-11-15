@@ -21,6 +21,7 @@ public class RoutineController2 extends BaseController implements Job {
 			throws JobExecutionException {
 		CurrencyController currencyController = new CurrencyController();
 		currencyController.updateCurrency();
+		
 	}
 	
 }

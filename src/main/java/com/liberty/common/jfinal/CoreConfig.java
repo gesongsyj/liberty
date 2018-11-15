@@ -13,6 +13,7 @@ import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.activerecord.OrderedFieldContainerFactory;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.plugin.druid.DruidPlugin;
+import com.jfinal.plugin.redis.RedisPlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
 import com.liberty.common.interceptor.CoreInterceptor;
@@ -66,9 +67,9 @@ public class CoreConfig extends JFinalConfig {
 		_MappingKit.mapping(arp);
 
 		// 定时任务
-//		QuartzPlugin quartz = new QuartzPlugin();
-//		quartz.setJobs("job.properties");
-//		me.add(quartz);
+		QuartzPlugin quartz = new QuartzPlugin();
+		quartz.setJobs("job.properties");
+		me.add(quartz);
 
 		// 初始化事件插件
 		EventPlugin plugin = new EventPlugin();
@@ -76,6 +77,7 @@ public class CoreConfig extends JFinalConfig {
 		plugin.scanJar(); // 设置扫描jar包，默认不扫描
 		// plugin.scanPackage("com.hotel.service.event"); // 设置监听器默认包，默认全扫描
 		me.add(plugin);
+		
 	}
 
 	@Override
@@ -100,10 +102,9 @@ public class CoreConfig extends JFinalConfig {
 	public void afterJFinalStart() {
 //		CurrencyController currencyController = new CurrencyController();
 //		currencyController.updateCurrency();
+		
 //		KlineController klineController = new KlineController();
-//		klineController.downloadData(null);
-//		klineController.createStroke(null);
-//		klineController.createLine(null);
+//		klineController.multiProData();
 	}
 
 }

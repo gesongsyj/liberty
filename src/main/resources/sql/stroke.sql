@@ -43,7 +43,7 @@
 	from stroke s join currency c on s.currencyId=c.id
 	#set(flag=0)
 	#if(date)
-		#(flag==0?"where":"and") s.startDate >= #para(date)
+		#(flag==0?"where":"and") s.endDate > #para(date)
 		#set(flag=1)
 	#end
 	#if(code)

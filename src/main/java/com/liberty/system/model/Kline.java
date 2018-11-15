@@ -84,4 +84,10 @@ public class Kline extends BaseKline<Kline> {
 		return list;
 	}
 
+	public List<Kline> getByCurrencyId(String currencyId) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("currencyId", currencyId));
+		List<Kline> list = dao.find(sqlPara);
+		return list;
+	}
+
 }

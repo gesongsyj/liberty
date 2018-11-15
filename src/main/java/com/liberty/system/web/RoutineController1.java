@@ -21,10 +21,9 @@ public class RoutineController1 extends BaseController implements Job {
 			throws JobExecutionException {
 //		CurrencyController currencyController = new CurrencyController();
 //		currencyController.updateCurrency();
+		
 		KlineController klineController = new KlineController();
-		klineController.downloadData(null);
-		klineController.createStroke(null);
-		klineController.createLine(null);
+		klineController.multiProData();
 	}
 	
 }

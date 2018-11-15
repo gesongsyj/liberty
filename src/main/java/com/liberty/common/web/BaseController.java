@@ -420,6 +420,9 @@ public class BaseController extends Controller {
 	}
 
 	public void loopProcessLines3(List<Stroke> strokes, List<Line> lines) {
+		if(strokes==null || strokes.size()==0) {
+			return;
+		}
 		Integer currencyId = strokes.get(0).getCurrencyId();
 		String type = strokes.get(0).getType();
 		int size = strokes.size();
@@ -435,13 +438,13 @@ public class BaseController extends Controller {
 			if (i == 2 && "0".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
 				// 第一笔包含第三笔
 				if (strokes.get(i - 2).getMax() > strokes.get(i).getMax()) {
-					premax = strokes.get(i).getMax();
+					premax = strokes.get(i).getMax()-0.01;
 				}
 			}
 			if (i == 2 && "1".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
 				// 第一笔包含第三笔
 				if (strokes.get(i - 2).getMin() < strokes.get(i).getMin()) {
-					premin = strokes.get(i).getMin();
+					premin = strokes.get(i).getMin()+0.01;
 				}
 			}
 
@@ -512,7 +515,7 @@ public class BaseController extends Controller {
 					break;
 				}
 				// 2:线段破坏
-				for (int j = i + 1; j < size - 1; j++) {
+				for (int j = i + 1; j < size ; j++) {
 					if (strokes.get(j).getMin() < premax) {
 						// 线段破坏成立
 						Line tmpLine = new Line();
@@ -625,7 +628,7 @@ public class BaseController extends Controller {
 					break;
 				}
 				// 2:线段破坏
-				for (int j = i + 1; j < size - 1; j++) {
+				for (int j = i + 1; j < size ; j++) {
 					if (strokes.get(j).getMax() > premin) {
 						// 线段破坏成立
 						Line tmpLine = new Line();
@@ -996,14 +999,14 @@ public class BaseController extends Controller {
 				}
 			}
 		}
-		Line.dao.updateStroke();
+		for (Line line : lines) {
+			line.updateStroke();
+		}
 	}
 
 	public List<Stroke> processStrokes(List<Kline> klines, Stroke inStroke) {
 		int currencyId = klines.get(0).getCurrencyId();
 		Currency currency = Currency.dao.findById(currencyId);
-		currency.setBuyPoint(false);
-		currency.setSalePoint(false);
 		String code = currency.getCode();
 		String type = klines.get(0).getType();
 		List<Stroke> strokes = new ArrayList<Stroke>();
@@ -1224,8 +1227,9 @@ public class BaseController extends Controller {
 				}
 			}
 		}
-		Stroke.dao.updateKline();
-		currency.update();
+		for (Stroke stroke : strokes) {
+			stroke.updateKline();
+		}
 		return strokes;
 	}
 }

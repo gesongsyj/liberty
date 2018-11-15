@@ -102,3 +102,13 @@
 	order by date asc
 #end
 
+#sql("getByCurrencyId")
+	select *
+	from kline 
+	#set(flag=0)
+	#if(currencyId)
+		#(flag==0?"where":"and") currencyId >= #para(currencyId)
+		#set(flag=1)
+	#end
+#end
+
