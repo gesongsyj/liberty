@@ -420,7 +420,7 @@ public class BaseController extends Controller {
 	}
 
 	public void loopProcessLines3(List<Stroke> strokes, List<Line> lines) {
-		if(strokes==null || strokes.size()==0) {
+		if (strokes == null || strokes.size() == 0) {
 			return;
 		}
 		Integer currencyId = strokes.get(0).getCurrencyId();
@@ -437,14 +437,16 @@ public class BaseController extends Controller {
 		outter: for (int i = 0; i < size - 3; i++) {
 			if (i == 2 && "0".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
 				// 第一笔包含第三笔
-				if (strokes.get(i - 2).getMax() > strokes.get(i).getMax()) {
-					premax = strokes.get(i).getMax()-0.01;
+				if (strokes.get(i - 2).getMax() > strokes.get(i).getMax()
+						&& strokes.get(i - 2).getMin() < strokes.get(i).getMin()) {
+					premax = strokes.get(i).getMax() - 0.01;
 				}
 			}
 			if (i == 2 && "1".equals(strokes.get(i).getDirection()) && lines.size() != 0) {
 				// 第一笔包含第三笔
-				if (strokes.get(i - 2).getMin() < strokes.get(i).getMin()) {
-					premin = strokes.get(i).getMin()+0.01;
+				if (strokes.get(i - 2).getMax() > strokes.get(i).getMax()
+						&& strokes.get(i - 2).getMin() < strokes.get(i).getMin()) {
+					premin = strokes.get(i).getMin() + 0.01;
 				}
 			}
 
@@ -490,7 +492,8 @@ public class BaseController extends Controller {
 						}
 					} else {
 						tmpLine.setStartDate(strokes.get(0).getStartDate());
-						tmpLine.setMin("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
+						tmpLine.setMin("0".equals(strokes.get(0).getDirection()) ? strokes.get(0).getMin()
+								: strokes.get(0).getMax());
 //						tmpLine.setEndDate(strokes.get(i).getEndDate());
 //						tmpLine.setMax(strokes.get(i).getMax());
 						tmpLine.saveOrUpdate(currencyId, type);
@@ -515,7 +518,7 @@ public class BaseController extends Controller {
 					break;
 				}
 				// 2:线段破坏
-				for (int j = i + 1; j < size ; j++) {
+				for (int j = i + 1; j < size - 1; j++) {
 					if (strokes.get(j).getMin() < premax) {
 						// 线段破坏成立
 						Line tmpLine = new Line();
@@ -602,7 +605,8 @@ public class BaseController extends Controller {
 						}
 					} else {
 						tmpLine.setStartDate(strokes.get(0).getStartDate());
-						tmpLine.setMax("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
+						tmpLine.setMax("0".equals(strokes.get(0).getDirection()) ? strokes.get(0).getMin()
+								: strokes.get(0).getMax());
 //						tmpLine.setEndDate(strokes.get(i).getEndDate());
 //						tmpLine.setMin(strokes.get(i).getMin());
 						tmpLine.saveOrUpdate(currencyId, type);
@@ -628,7 +632,7 @@ public class BaseController extends Controller {
 					break;
 				}
 				// 2:线段破坏
-				for (int j = i + 1; j < size ; j++) {
+				for (int j = i + 1; j < size - 1; j++) {
 					if (strokes.get(j).getMax() > premin) {
 						// 线段破坏成立
 						Line tmpLine = new Line();
@@ -654,7 +658,8 @@ public class BaseController extends Controller {
 							}
 						} else {
 							tmpLine.setStartDate(strokes.get(0).getStartDate());
-							tmpLine.setMax("0".equals(strokes.get(0).getDirection())?strokes.get(0).getMin():strokes.get(0).getMax());
+							tmpLine.setMax("0".equals(strokes.get(0).getDirection()) ? strokes.get(0).getMin()
+									: strokes.get(0).getMax());
 							tmpLine.saveOrUpdate(currencyId, type);
 							lines.add(tmpLine);
 						}
@@ -1051,10 +1056,6 @@ public class BaseController extends Controller {
 								lastStroke.setEndDate(shape.getDate());
 								lastStroke.saveOrUpdate(code, type);// =================
 
-								// 设置卖点
-//								if (i == klines.size() - 3) {
-//									currency.setSalePoint(true);
-//								}
 							}
 						}
 					} else {
@@ -1082,11 +1083,6 @@ public class BaseController extends Controller {
 									strokes.add(gapStroke);
 									index = i + 1;
 									strokeStartIndex = i + 1;
-
-									// 设置卖点
-//									if (i == klines.size() - 3) {
-//										currency.setSalePoint(true);
-//									}
 
 								} else {
 									continue;
@@ -1119,10 +1115,6 @@ public class BaseController extends Controller {
 							index = i + 1;
 							strokeStartIndex = i + 1;
 
-							// 设置卖点
-//							if (i == klines.size() - 3) {
-//								currency.setSalePoint(true);
-//							}
 						}
 					}
 
@@ -1151,10 +1143,6 @@ public class BaseController extends Controller {
 								lastStroke.setEndDate(shape.getDate());
 								lastStroke.saveOrUpdate(code, type);// =================
 
-								// 设置买点
-//								if (i == klines.size() - 3) {
-//									currency.setBuyPoint(true);
-//								}
 							}
 						}
 					} else {
@@ -1183,10 +1171,6 @@ public class BaseController extends Controller {
 									index = i + 1;
 									strokeStartIndex = i + 1;
 
-									// 设置买点
-//									if (i == klines.size() - 3) {
-//										currency.setBuyPoint(true);
-//									}
 								} else {
 									continue;
 								}
@@ -1218,10 +1202,6 @@ public class BaseController extends Controller {
 							index = i + 1;
 							strokeStartIndex = i + 1;
 
-							// 设置买点
-//							if (i == klines.size() - 3) {
-//								currency.setBuyPoint(true);
-//							}
 						}
 					}
 				}

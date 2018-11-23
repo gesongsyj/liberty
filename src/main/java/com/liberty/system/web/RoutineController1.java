@@ -1,11 +1,14 @@
 package com.liberty.system.web;
 
 
+import java.util.List;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import com.liberty.common.web.BaseController;
+import com.liberty.system.model.Currency;
 
 
 /**
@@ -23,7 +26,8 @@ public class RoutineController1 extends BaseController implements Job {
 //		currencyController.updateCurrency();
 		
 		KlineController klineController = new KlineController();
-		klineController.multiProData();
+		List<Currency> listAll = Currency.dao.listAll();
+		klineController.multiProData(listAll);
 	}
 	
 }

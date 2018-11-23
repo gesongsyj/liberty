@@ -77,8 +77,8 @@ public class KlineController extends BaseController {
 		klineController.downloadData(code);
 		klineController.createStroke(code);
 		klineController.createLine(code);
-		setAttr("code", code);
-		render("kline.html");
+		Currency currency = Currency.dao.findByCode(code);
+		redirect("/kline/charts?currencyId="+currency.getId());
 	}
 	
 	/**
@@ -379,10 +379,9 @@ public class KlineController extends BaseController {
 	/**
 	 * 多线程下载 处理数据
 	 */
-	public void multiProData() {
-		ExecutorService threadPool = Executors.newFixedThreadPool(20);
-		List<Currency> listAll = Currency.dao.listAll();
-		for (Currency currency : listAll) {
+	public void multiProData(List<Currency> cs) {
+		ExecutorService threadPool = Executors.newFixedThreadPool(10);
+		for (Currency currency : cs) {
 			threadPool.execute(new Runnable() {
 				@Override
 				public void run() {

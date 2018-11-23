@@ -50,6 +50,7 @@
 					</div>
 					<button id="query" type="submit" class="btn btn-default"
 						style="margin-left: 3%">Search</button>
+					<a class="btn btn-success" href="../currency/updateData" role="button" style="margin-left: 1%">统一更新数据</a>
 				</form>
 				<table class="table table-bordered" style="margin-top: 50px;">
 					<thead>
@@ -83,7 +84,7 @@
 								<#else>
 									<a class="btn btn-success" href="../currency/addFollow?currencyId=${p.id}&followed=true&qo.currentPage=${qo.currentPage}" role="button">添加标记</a>
 								</#if>
-								<a class="btn btn-danger" href="../currency/delete?currencyId=${p.id}&qo.currentPage=${qo.currentPage}" role="button">删除该股</a>
+								<a class="btn btn-warning" href="../currency/delete?currencyId=${p.id}&qo.currentPage=${qo.currentPage}" role="button">删除该股</a>
 							</td>
 						
 						</tr>

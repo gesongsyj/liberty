@@ -34,16 +34,29 @@ import com.liberty.system.service.impl.CurrencyKit_Wh;
 
 public class CurrencyController extends BaseController {
 	/**
-	 * 抓取财经网站深证,沪证涨幅排行榜前n位的股票添加到数据库
+	 *统一更新数据库所有股票的数据
+	 */
+	@Before(Tx.class)
+	public void updateData() {
+		KlineController klineController = new KlineController();
+		List<Currency> listAll = Currency.dao.listAll();
+		klineController.multiProData(listAll);
+		redirect("/currency/list");
+	}
+	
+	/**
+	 * 抓取财经网站深证,沪证涨幅排行榜前n位的股票添加到数据库并下载数据
 	 */
 	@Before(Tx.class)
 	public void updateCurrency() {
 //		CurrencyKit currency=new CurrencyKit_Wh();
-		CurrencyKit currency = new CurrencyKit_Gp();
-		currency.update();
-		renderText("ok");
+		CurrencyKit currencyKit = new CurrencyKit_Gp();
+		List<Currency> cs = currencyKit.update();
+		KlineController klineController = new KlineController();
+		klineController.multiProData(cs);
+		redirect("/currency/list");
 	}
-
+	
 	/**
 	 * 对该股添加标记,后续可能有期望的走势出现
 	 */

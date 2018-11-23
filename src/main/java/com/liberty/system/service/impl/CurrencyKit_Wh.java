@@ -1,10 +1,13 @@
 package com.liberty.system.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.jfinal.plugin.activerecord.Db;
 import com.liberty.common.utils.HTTPUtils;
 import com.liberty.system.model.Currency;
 import com.liberty.system.service.CurrencyKit;
@@ -12,7 +15,8 @@ import com.liberty.system.service.CurrencyKit;
 public class CurrencyKit_Wh implements CurrencyKit{
 
 	@Override
-	public void update() {
+	public List<Currency> update() {
+		ArrayList<Currency> cs = new ArrayList<Currency>();
 		String response = "";
 		String currencyUrl = "http://forex.wiapi.hexun.com/forex/sortlist";
 		Map<String, String> params = new HashMap<String, String>();
@@ -38,7 +42,9 @@ public class CurrencyKit_Wh implements CurrencyKit{
 					currency=new Currency();
 					currency.setCode(parseArray2.get(0).toString());
 					currency.setName(parseArray2.get(1).toString());
+					cs.add(currency);
 					currency.save();
+					
 				}/*else{
 					currency.setCode(parseArray2.get(0).toString());
 					currency.setName(parseArray2.get(1).toString());
@@ -47,11 +53,10 @@ public class CurrencyKit_Wh implements CurrencyKit{
 			}
 //			System.out.println(parseArray.toString());
 //			renderText(parseArray.toString());
-//			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		return cs;
 	}
 
 }
