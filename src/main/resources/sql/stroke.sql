@@ -77,7 +77,7 @@
 		#(flag==0?"where":"and") s.type = #para(type)
 		#set(flag=1)
 	#end
-	order by startDate asc
+	order by startDate desc
 #end
 
 #sql("listAll")

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,8 +30,16 @@ import com.liberty.system.service.DownLoader;
 import com.liberty.system.service.impl.HxDownLoader;
 import com.liberty.system.service.impl.DfcfDownLoader;
 import com.liberty.system.service.impl.XlDownLoader;
+import com.liberty.system.strategy.executor.Executor;
+import com.liberty.system.strategy.executor.stratege1Executor;
 
 public class KlineController extends BaseController {
+	private List<Executor> exes=new ArrayList<Executor>();
+	
+	public KlineController() {
+		exes.add(new stratege1Executor());
+	}
+
 	private static final Map<String, String> klineTypeNumberMap;
 	private static final Map<String, Integer> klineTypeBetweenMap;
 	static {
@@ -327,7 +334,6 @@ public class KlineController extends BaseController {
 	public void createLine(String includeCurrencyCode) {
 		List<Stroke> strokes=null;
 		
-		List<Currency> listAll = Currency.dao.listAll();
 		String sql = "select * from dictionary where type='klineType_gp'";
 		List<Record> klineType = Db.find(sql);
 		for (Record record : klineType) {
@@ -388,6 +394,9 @@ public class KlineController extends BaseController {
 					downloadData(currency.getCode());
 					createStroke(currency.getCode());
 					createLine(currency.getCode());
+					for (Executor exe : exes) {
+						exe.execute(currency.getCode());
+					}
 				}
 			});
 		}

@@ -6,5 +6,5 @@ import java.util.Vector;
 import com.liberty.system.model.Currency;
 
 public interface Executor {
-	Vector<Currency> execute();
+	Vector<Currency> execute(String code);
 }

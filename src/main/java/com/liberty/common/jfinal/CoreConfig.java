@@ -1,5 +1,7 @@
 package com.liberty.common.jfinal;
 
+import java.util.Vector;
+
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
 import com.jfinal.config.Interceptors;
@@ -19,6 +21,8 @@ import com.jfinal.template.Engine;
 import com.liberty.common.interceptor.CoreInterceptor;
 import com.liberty.common.interceptor.ShiroInterceptor;
 import com.liberty.common.jfinal._MappingKit;
+import com.liberty.system.model.Currency;
+import com.liberty.system.strategy.executor.stratege1Executor;
 import com.liberty.system.web.CurrencyController;
 import com.liberty.system.web.KlineController;
 
@@ -105,6 +109,9 @@ public class CoreConfig extends JFinalConfig {
 		
 //		KlineController klineController = new KlineController();
 //		klineController.multiProData();
+		
+		stratege1Executor executor = new stratege1Executor();
+		Vector<Currency> execute = executor.execute(null);
 	}
 
 }

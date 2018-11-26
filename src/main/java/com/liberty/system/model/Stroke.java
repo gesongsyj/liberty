@@ -17,40 +17,41 @@ import com.liberty.system.query.StrokeQueryObject;
 @SuppressWarnings("serial")
 public class Stroke extends BaseStroke<Stroke> {
 	private boolean fromGap;
-	
+
 	public static final Stroke dao = new Stroke().dao();
-	
-	private List<Kline> allKlines=new ArrayList<Kline>();
-	
+
+	private List<Kline> allKlines = new ArrayList<Kline>();
+
 	/**
 	 * 是否是缺口成笔
+	 * 
 	 * @return
 	 */
 	public boolean isFromGap() {
 		return fromGap;
 	}
-	
+
 	public void setFromGap(boolean fromGap) {
 		this.fromGap = fromGap;
 	}
-	
-	public void updateKline(){
+
+	public void updateKline() {
 		Db.batchUpdate(allKlines, 5000);
 		allKlines.clear();
 	}
-	
-	public boolean saveOrUpdate(String code,String type) {
-		if(this.getId()!=null) {
-			return update(code,type);
-		}else {
+
+	public boolean saveOrUpdate(String code, String type) {
+		if (this.getId() != null) {
+			return update(code, type);
+		} else {
 			return save(code, type);
 		}
 	}
-	
-	public boolean update(String code,String type) {
+
+	public boolean update(String code, String type) {
 		try {
 			super.update();
-			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
+			List<Kline> klines = Kline.dao.getByDateRange(code, type, this.getStartDate(), this.getEndDate());
 			for (Kline kline : klines) {
 				kline.setStrokeId(this.getId());
 				allKlines.add(kline);
@@ -61,11 +62,11 @@ public class Stroke extends BaseStroke<Stroke> {
 			return false;
 		}
 	}
-	
-	public boolean save(String code,String type){
+
+	public boolean save(String code, String type) {
 		try {
 			super.save();
-			List<Kline> klines = Kline.dao.getByDateRange(code,type,this.getStartDate(),this.getEndDate());
+			List<Kline> klines = Kline.dao.getByDateRange(code, type, this.getStartDate(), this.getEndDate());
 			for (Kline kline : klines) {
 				kline.setStrokeId(this.getId());
 				allKlines.add(kline);
@@ -76,30 +77,30 @@ public class Stroke extends BaseStroke<Stroke> {
 			return false;
 		}
 	}
-	
+
 	public Page<Stroke> paginate(StrokeQueryObject qo) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("qo", qo));
 		return dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
 	}
-	
+
 	public Stroke getLastByCode(String code, String type) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
 		Stroke stroke = dao.findFirst(sqlPara);
 		return stroke;
 	}
-	
+
 	public List<Stroke> listAllByCode(String code, String type) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type));
 		List<Stroke> list = dao.find(sqlPara);
 		return list;
 	}
-	
+
 	public List<Stroke> getListByDate(String code, String type, Date date) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("code", code).set("type", type).set("date", date));
 		List<Stroke> list = dao.find(sqlPara);
 		return list;
 	}
-	
+
 	public List<Stroke> getByDateRange(int currencyId, String type, Date startDate, Date endDate) {
 		SqlPara sqlPara = getSqlParaFromTemplate(
 				Kv.by("currencyId", currencyId).set("type", type).set("startDate", startDate).set("endDate", endDate));
@@ -112,4 +113,5 @@ public class Stroke extends BaseStroke<Stroke> {
 		List<Stroke> list = dao.find(sql);
 		return list;
 	}
+
 }
