@@ -13,3 +13,6 @@
 #namespace("account")
 	#include("account.sql")
 #end
+#namespace("strategy")
+	#include("strategy.sql")
+#end

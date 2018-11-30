@@ -1,4 +1,4 @@
-package com.liberty.system.service.impl;
+package com.liberty.system.downloader.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.downloader.DownLoader;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
-import com.liberty.system.service.DownLoader;
 
 public class XlDownLoader implements DownLoader {
 	// private String sina_url="https://ex.sina.com.cn/";
@@ -51,7 +51,7 @@ public class XlDownLoader implements DownLoader {
 	}
 
 	@Override
-	public List<Kline> downLoad(Currency currency, String type, String method, Kline lastKline) {
+	public List<Kline> downLoad(Currency currency, String type, String method, Date lastDate) {
 		Map<String, String> params = new HashMap<String, String>();
 		List<Kline> klineList = new ArrayList<Kline>();
 		String response = "";
@@ -94,10 +94,9 @@ public class XlDownLoader implements DownLoader {
 					+ "=/NewForexService.getMinKline";
 			params.put("symbol", "fx_s" + currency.getCode().toLowerCase());
 			params.put("scale", paramTypeMap.get(type));
-			if (lastKline == null) {
+			if (lastDate == null) {
 				params.put("datalen", klineTypeNumberMap.get(type) == null ? "1000" : klineTypeNumberMap.get(type));
 			} else {
-				Date lastDate = lastKline.getDate();
 				long between = DateUtil.getNumberBetween(DateUtil.getNextDay(now), lastDate,
 						klineTypeBetweenMap.get(type));
 				String number = String.valueOf(between);

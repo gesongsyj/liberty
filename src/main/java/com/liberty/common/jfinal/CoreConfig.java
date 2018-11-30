@@ -11,6 +11,7 @@ import com.jfinal.config.Routes;
 import com.jfinal.core.JFinal;
 import com.jfinal.ext.interceptor.SessionInViewInterceptor;
 import com.jfinal.kit.PathKit;
+import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.activerecord.OrderedFieldContainerFactory;
 import com.jfinal.plugin.activerecord.tx.Tx;
@@ -18,10 +19,13 @@ import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.plugin.redis.RedisPlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
+import com.jfplugin.mail.MailPlugin;
 import com.liberty.common.interceptor.CoreInterceptor;
 import com.liberty.common.interceptor.ShiroInterceptor;
 import com.liberty.common.jfinal._MappingKit;
+import com.liberty.common.utils.MailUtil;
 import com.liberty.system.model.Currency;
+import com.liberty.system.model.Strategy;
 import com.liberty.system.strategy.executor.stratege1Executor;
 import com.liberty.system.web.CurrencyController;
 import com.liberty.system.web.KlineController;
@@ -74,6 +78,10 @@ public class CoreConfig extends JFinalConfig {
 		QuartzPlugin quartz = new QuartzPlugin();
 		quartz.setJobs("job.properties");
 		me.add(quartz);
+		
+		//邮件插件
+		MailPlugin mailPlugin = new MailPlugin(PropKit.use("mail.properties").getProperties());
+		me.add(mailPlugin);
 
 		// 初始化事件插件
 		EventPlugin plugin = new EventPlugin();
@@ -110,8 +118,13 @@ public class CoreConfig extends JFinalConfig {
 //		KlineController klineController = new KlineController();
 //		klineController.multiProData();
 		
-		stratege1Executor executor = new stratege1Executor();
-		Vector<Currency> execute = executor.execute(null);
+//		stratege1Executor executor = new stratege1Executor();
+//		Vector<Currency> cs = executor.execute(null);
+		
+//		Vector<Currency> vector = new Vector<>();
+//		vector.add(new Currency().setCode("11111").setName("11111"));
+//		Strategy strategy = new Strategy().setDescribe("二三买重合");
+//		MailUtil.sendMailToBuy(vector, strategy);
 	}
 
 }

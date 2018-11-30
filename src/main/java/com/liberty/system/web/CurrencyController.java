@@ -3,6 +3,7 @@ package com.liberty.system.web;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,14 +24,16 @@ import com.liberty.common.utils.JsonToMap;
 import com.liberty.common.utils.ResultMsg;
 import com.liberty.common.utils.ResultStatusCode;
 import com.liberty.common.web.BaseController;
+import com.liberty.system.blackHouse.RemoveStrategyBh;
+import com.liberty.system.downloader.CurrencyKit;
+import com.liberty.system.downloader.impl.CurrencyKit_Gp;
+import com.liberty.system.downloader.impl.CurrencyKit_Wh;
 import com.liberty.system.model.Account;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
+import com.liberty.system.model.Strategy;
 import com.liberty.system.query.CurrencyQueryObject;
 import com.liberty.system.query.KlineQueryObject;
-import com.liberty.system.service.CurrencyKit;
-import com.liberty.system.service.impl.CurrencyKit_Gp;
-import com.liberty.system.service.impl.CurrencyKit_Wh;
 
 public class CurrencyController extends BaseController {
 	/**
@@ -68,6 +71,17 @@ public class CurrencyController extends BaseController {
 		currency.setFollowed(Boolean.valueOf(followed));
 		currency.update();
 		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
+	}
+	
+	/**
+	 * 数据库已有股票的分页查询
+	 */
+	public void listStrategy() {
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
+		Page<Currency> paginate = Currency.dao.paginateToBuy(qo);
+		setAttr("pageResult", paginate);
+		setAttr("qo", qo);
+		render("listStrategy.html");
 	}
 	
 	/**
@@ -146,9 +160,12 @@ public class CurrencyController extends BaseController {
 		klineController.downloadData(c.getCode());
 		klineController.createStroke(c.getCode());
 		klineController.createLine(c.getCode());
-		list();
+		redirect("/currency/list");
 	}
 	
+	/**
+	 * 删除该股
+	 */
 	public  void delete() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
@@ -159,5 +176,32 @@ public class CurrencyController extends BaseController {
 		Db.update("delete from line where currencyId=?", currencyId);
 		Db.update("delete from currency where id=?",currencyId);
 		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
+	}
+	
+	/**
+	 * 设置止损线
+	 */
+	public void cutLine() {
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
+		String id = paras.get("id");
+		String cutStr = paras.get("cutLine").toString();
+		Double cutLine=null;
+		if(!"null".equals(cutStr)) {
+			cutLine=Double.valueOf(paras.get("cutLine").toString());
+		}
+		Record record = Db.findById("currency_strategy", id);
+		record.set("cutLine", cutLine);
+		Db.update("currency_strategy", record);
+		redirect("/currency/listStrategy?qo.currentPage="+qo.getCurrentPage());
+	}
+	
+	public void removeFromStrategy() {
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
+		String csId = paras.get("csId");
+		Record record = Db.findById("currency_strategy", csId);
+		Currency currency = Currency.dao.findById(record.getInt("currencyId"));
+		RemoveStrategyBh.add(currency, new Date());//关进小黑屋
+		Db.delete("currency_strategy", record);
+		redirect("/currency/listStrategy?qo.currentPage="+qo.getCurrentPage());
 	}
 }

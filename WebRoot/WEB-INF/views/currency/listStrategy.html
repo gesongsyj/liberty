@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Currency</title>
+
+<#include "/dist/common/link.html" />
+
+<script type="text/javascript">
+		$(function() {
+			$('#query').click(function() {
+				$('#currentPage').val(1);
+				$('#currencyForm').submit();
+			});
+			$('#pagination').twbsPagination({
+				totalPages: ${pageResult.totalPage},
+				visiblePages:5,
+				startPage:${pageResult.pageNumber},
+				onPageClick:function(event,page){
+					$('#currentPage').val(page);
+					$('#currencyForm').submit();
+				}
+			});
+			$('#myModal').on('show.bs.modal', function (event) {
+				  console.log($('#currentPage').val());
+				  var button = $(event.relatedTarget);
+				  var id = button.data('id');
+				  console.log(id);
+				  var currentPage = button.data('currentpage');
+				  console.log(currentPage);
+				  var modal = $(this);
+				  $('#cutLineForm #id').val(id);
+				  $('#cutLineForm #currentPage').val(currentPage);
+				  console.log($('#cutLineForm #currentPage').val());
+			});
+			$('#cutLine_btn').click(function() {
+				$('#cutLineForm').submit();
+			});
+		})
+
+</script>
+</head>
+<body>
+	<#include "/dist/common/header.html" />
+	<div class="container-fluid">
+		<div class="row">
+			<#include "/dist/common/left.html" />
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
+				<form id="currencyForm" action="listStrategy" class="form-inline"
+					style="margin-top: 30px;" method="post">
+					<input type="hidden" id="currentPage" name="qo.currentPage" value="${qo.currentPage}"/>
+					<div class="form-group" style="margin-left: 3%;">
+						<label for="exampleInputName2">股票名称</label> <input type="text"
+							class="form-control" id="exampleInputName" name="qo.name">
+					</div>
+					<div class="form-group" style="margin-left: 3%">
+						<label for="exampleInputEmail2">股票代码</label> <input type="text"
+							class="form-control" id="exampleInputEmail" name="qo.code">
+					</div>
+					<button id="query" type="submit" class="btn btn-default"
+						style="margin-left: 3%">Search</button>
+					<a class="btn btn-success" href="../currency/updateData" role="button" style="margin-left: 1%">统一更新数据</a>
+				</form>
+				<table class="table table-bordered" style="margin-top: 50px;">
+					<thead>
+						<tr>
+							<th>序号
+							<th>股票名称
+							<th>股票代码
+							<th>满足策略
+							<th>止损线
+							<th>操作
+						</tr>
+					</thead>
+					<tbody>
+						<#if pageResult.list?size==0>
+						<tr>
+							<td colspan="5">暂无数据...
+						</tr>
+						</#if>
+						<#list pageResult.list as p>
+						<tr>
+							<td>${p_index+1}
+							<td>${p.name}
+							<td>${p.code} 
+							<td>${p.describe}
+							<#if (p.cutLine)??>
+								<td>${p.cutLine}
+							<#else>
+								<td>未设置
+							</#if>
+							<td><a class="btn btn-primary" href="../kline/charts?currencyId=${p.id}" role="button" target="_Blank">查看图表</a>
+								<a class="btn btn-danger" href="../currency/removeFromStrategy?csId=${p.csId}&qo.currentPage=${qo.currentPage}" role="button" target="_Blank">移出策略池</a>
+								<button type="button" class="btn btn-success"
+										data-toggle="modal" data-target="#myModal" 
+										data-id="${p.csId}" data-currentpage="${qo.currentPage}">设置止损线</button></td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+				<div style="text-align: center;">
+					<ul id="pagination" class="pagination-sm"></ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="exampleModalLabel">设置止损线</h4>
+	      </div>
+	      
+	       <div class="modal-body" style="text-align: center;"
+					id="down_btn_text">
+		      	<form id="cutLineForm" action="cutLine" class="form-inline"
+										 method="post">
+					<input hidden="true" id="id" name="id" />
+					<input hidden="true" id="currentPage" name="qo.currentPage" />
+					<div class="form-group">止损线: 
+						<input type="text" placeholder="填null表示清除止损线设置" class="form-control"
+							name="cutLine">
+					</div>
+				</form>
+	      </div>
+		   <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" class="btn btn-primary" id="cutLine_btn">确认</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+</body>
+</html>

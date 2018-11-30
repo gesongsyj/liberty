@@ -1,4 +1,4 @@
-package com.liberty.system.service.impl;
+package com.liberty.system.downloader.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,8 @@ import com.alibaba.fastjson.JSON;
 import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.downloader.CurrencyKit;
 import com.liberty.system.model.Currency;
-import com.liberty.system.service.CurrencyKit;
 
 public class CurrencyKit_Gp implements CurrencyKit {
 	private int pagesize = 1;// 5页股票排行数据,每页20条,共100条数据

@@ -21,15 +21,15 @@ import com.liberty.common.utils.HTTPUtils;
 import com.liberty.common.utils.ResultMsg;
 import com.liberty.common.utils.ResultStatusCode;
 import com.liberty.common.web.BaseController;
+import com.liberty.system.downloader.DownLoader;
+import com.liberty.system.downloader.impl.DfcfDownLoader;
+import com.liberty.system.downloader.impl.HxDownLoader;
+import com.liberty.system.downloader.impl.XlDownLoader;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
 import com.liberty.system.model.Line;
 import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
-import com.liberty.system.service.DownLoader;
-import com.liberty.system.service.impl.HxDownLoader;
-import com.liberty.system.service.impl.DfcfDownLoader;
-import com.liberty.system.service.impl.XlDownLoader;
 import com.liberty.system.strategy.executor.Executor;
 import com.liberty.system.strategy.executor.stratege1Executor;
 
@@ -253,7 +253,7 @@ public class KlineController extends BaseController {
 					lastKlineMap.put(includeCurrencyCode + "_" + record.getStr("key"), lastKline);
 				}
 				List<Kline> klineList = null;
-				klineList = downLoader.downLoad(currency, record.getStr("key"), "get", lastKline);
+				klineList = downLoader.downLoad(currency, record.getStr("key"), "get", lastKline!=null?lastKline.getDate():null);
 				if (klineList == null || klineList.size() == 0) {
 					continue;
 				}
@@ -386,7 +386,7 @@ public class KlineController extends BaseController {
 	 * 多线程下载 处理数据
 	 */
 	public void multiProData(List<Currency> cs) {
-		ExecutorService threadPool = Executors.newFixedThreadPool(10);
+		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (Currency currency : cs) {
 			threadPool.execute(new Runnable() {
 				@Override

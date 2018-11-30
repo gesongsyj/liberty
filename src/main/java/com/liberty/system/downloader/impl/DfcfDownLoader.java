@@ -1,4 +1,4 @@
-package com.liberty.system.service.impl;
+package com.liberty.system.downloader.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,9 +9,9 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.downloader.DownLoader;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Kline;
-import com.liberty.system.service.DownLoader;
 
 /**
  * 东方财富股票价格下载
@@ -33,7 +33,7 @@ public class DfcfDownLoader implements DownLoader {
 	}
 
 	@Override
-	public List<Kline> downLoad(Currency currency, String type, String method, Kline lastKline) {
+	public List<Kline> downLoad(Currency currency, String type, String method, Date lastDate) {
 		String url = "http://pdfm.eastmoney.com/EM_UBG_PDTI_Fast/api/js?rtntype=5&id=" + currency.getCode()
 				+ currency.getCurrencyType() + "&type=" + type + "&_=" + System.currentTimeMillis();
 		String response = HTTPUtils.http(url, null, method);
@@ -45,11 +45,14 @@ public class DfcfDownLoader implements DownLoader {
 		List<Kline> klines = new ArrayList<Kline>();
 		for (String s : dataArr) {
 			String[] str = s.split(",");
-			Date date=null;
-			if(str[0].contains(" ")) {
+			Date date = null;
+			if (str[0].contains(" ")) {
 				date = DateUtil.strDate(str[0], "yyyy-MM-dd HH:mm");
-			}else {
+			} else {
 				date = DateUtil.strDate(str[0], "yyyy-MM-dd");
+			}
+			if (lastDate !=null && date.getTime() <= lastDate.getTime()) {
+				continue;
 			}
 			Kline kline = new Kline();
 			kline.setDate(date);

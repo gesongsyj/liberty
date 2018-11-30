@@ -8,6 +8,7 @@ import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.SqlPara;
 import com.liberty.system.model.base.BaseCurrency;
 import com.liberty.system.model.base.BaseStroke;
+import com.liberty.system.query.CurrencyQueryObject;
 import com.liberty.system.query.QueryObject;
 import com.liberty.system.query.StrokeQueryObject;
 
@@ -17,6 +18,25 @@ import com.liberty.system.query.StrokeQueryObject;
 @SuppressWarnings("serial")
 public class Currency extends BaseCurrency<Currency> {
 	public static final Currency dao = new Currency().dao();
+	
+//	private List<Strategy> strategies;
+//
+//	public String getStrategies() {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("[");
+//		for (int i = 0; i < strategies.size(); i++) {
+//			sb.append(strategies.get(i).getDescribe());
+//			if(i!=strategies.size()-1) {
+//				sb.append(",");
+//			}
+//		}
+//		sb.append("]");
+//		return sb.toString();
+//	}
+//
+//	public void setStrategies(List<Strategy> strategies) {
+//		this.strategies = strategies;
+//	}
 
 	public Page<Currency> paginate(QueryObject qo) {
 		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("qo", qo));
@@ -33,6 +53,18 @@ public class Currency extends BaseCurrency<Currency> {
 		String sql = getSqlFromTemplate();
 		List<Currency> list = dao.find(sql);
 		return list;
+	}
+
+	public List<Currency> listAllByCutLine() {
+		String sql = getSqlFromTemplate();
+		List<Currency> list = dao.find(sql);
+		return list;
+	}
+
+	public Page<Currency> paginateToBuy(CurrencyQueryObject qo) {
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("qo", qo));
+		Page<Currency> page = dao.paginate(qo.getCurrentPage(), qo.getPageSize(), sqlPara);
+		return page;
 	}
 
 }

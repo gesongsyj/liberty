@@ -69,7 +69,7 @@
 		#(flag==0?"where":"and") s.endDate <= #para(endDate)
 		#set(flag=1)
 	#end
-	#if(code)
+	#if(currencyId)
 		#(flag==0?"where":"and") s.currencyId = #para(currencyId)
 		#set(flag=1)
 	#end

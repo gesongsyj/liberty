@@ -1,5 +1,9 @@
 package com.liberty.system.model;
 
+import java.util.List;
+
+import com.jfinal.kit.Kv;
+import com.jfinal.plugin.activerecord.SqlPara;
 import com.liberty.system.model.base.BaseStrategy;
 
 /**
@@ -9,4 +13,9 @@ import com.liberty.system.model.base.BaseStrategy;
 public class Strategy extends BaseStrategy<Strategy>{
 	public static final Strategy dao = new Strategy().dao();
 	
+	public List<Strategy> getByCurrency(int currencyId){
+		SqlPara sqlPara = getSqlParaFromTemplate(Kv.by("currencyId", currencyId));
+		List<Strategy> list = dao.find(sqlPara);
+		return list;
+	}
 }

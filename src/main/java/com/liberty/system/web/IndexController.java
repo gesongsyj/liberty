@@ -78,7 +78,7 @@ public class IndexController extends BaseController {
 				String ip = IpKit.getRealIp(getRequest());
 				Long port = IpKit.getRemotePort(getRequest());
 				logger.info("登陆账户：" + name + " 登陆IP：" + ip + "Port：" + port);
-				getSession().setAttribute("account", getAccount());
+				getSession().setAttribute("account", account.getStr("accountName"));
 				redirect("/currency/list");
 //				renderJson(new ResultMsg(ResultStatusCode.OK, account));
 

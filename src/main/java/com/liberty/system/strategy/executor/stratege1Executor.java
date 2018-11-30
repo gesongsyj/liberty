@@ -1,14 +1,19 @@
 package com.liberty.system.strategy.executor;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
+import com.jfplugin.mail.MailKit;
+import com.liberty.common.utils.MailUtil;
+import com.liberty.system.blackHouse.RemoveStrategyBh;
 import com.liberty.system.model.Centre;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Line;
@@ -35,19 +40,25 @@ public class stratege1Executor implements Executor {
 		Vector<Currency> stayCurrency = new Vector<>();
 		if (code == null) {
 			List<Currency> allCurrency = Currency.dao.listAll();
+			for (Currency currency : allCurrency) {
+				if(RemoveStrategyBh.inBlackHouse(currency)) {//在小黑屋里面,跳过
+					allCurrency.remove(currency);
+				}
+			}
 			multiProExe(allCurrency, stayCurrency);
 		} else {
-			if (executeSingle(code)) {
+			if (!RemoveStrategyBh.inBlackHouse(code) && executeSingle(code)) {//不在小黑屋里且满足策略
 				Currency currency = Currency.dao.findByCode(code);
 				successStrategy(currency);
 				stayCurrency.add(currency);
 			}
 		}
+		MailUtil.sendMailToBuy(stayCurrency, this.getStrategy());
 		return stayCurrency;
 	}
 
 	public void multiProExe(List<Currency> cs, Vector<Currency> sc) {
-		ExecutorService threadPool = Executors.newFixedThreadPool(10);
+		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (Currency currency : cs) {
 			threadPool.execute(new Runnable() {
 				@Override
@@ -58,6 +69,16 @@ public class stratege1Executor implements Executor {
 					}
 				}
 			});
+		}
+		// 启动一次顺序关闭，执行以前提交的任务，但不接受新任务。
+		threadPool.shutdown();
+		try {
+			// 请求关闭、发生超时或者当前线程中断，无论哪一个首先发生之后，都将导致阻塞，直到所有任务完成执行
+			// 设置最长等待30秒
+			threadPool.awaitTermination(30, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -175,11 +196,16 @@ public class stratege1Executor implements Executor {
 	}
 
 	public void successStrategy(Currency currency) {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Record record = Db.findFirst("select * from currency_strategy where currencyId=? and strategyId=?",
 				currency.getId(), this.strategy.getId());
 		if (record == null) {
-			record = new Record().set("currencyId", currency.getId()).set("strategyId", this.strategy.getId());
+			record = new Record().set("currencyId", currency.getId()).set("strategyId", this.strategy.getId())
+					.set("startDate", format.format(new Date()));
 			Db.save("currency_strategy", record);
+		} else {
+			record.set("startDate", format.format(new Date()));
+			Db.update("currency_strategy", record);
 		}
 		System.err.println(record);
 	}

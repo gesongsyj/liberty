@@ -1,4 +1,4 @@
-package com.liberty.system.service.impl;
+package com.liberty.system.downloader.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,8 +9,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.jfinal.plugin.activerecord.Db;
 import com.liberty.common.utils.HTTPUtils;
+import com.liberty.system.downloader.CurrencyKit;
 import com.liberty.system.model.Currency;
-import com.liberty.system.service.CurrencyKit;
 
 public class CurrencyKit_Wh implements CurrencyKit{
 
