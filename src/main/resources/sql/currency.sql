@@ -11,7 +11,7 @@
 		#set(flag=1)
 	#end
 	#if(qo.followed)
-		#(flag==0?"where":"and") followed=#para(qo.followed)
+		#(flag==0?"where":"and") followed=1
 		#set(flag=1)
 	#end
 #end
@@ -28,8 +28,8 @@
 		#(flag==0?"where":"and") c.code=#para(qo.code)
 		#set(flag=1)
 	#end
-	#if(qo.followed)
-		#(flag==0?"where":"and") c.followed=#para(qo.followed)
+	#if(qo.cutLine)
+		#(flag==0?"where":"and") cs.cutLine is not null
 		#set(flag=1)
 	#end
 #end

@@ -125,6 +125,9 @@ public class CoreConfig extends JFinalConfig {
 //		vector.add(new Currency().setCode("11111").setName("11111"));
 //		Strategy strategy = new Strategy().setDescribe("二三买重合");
 //		MailUtil.sendMailToBuy(vector, strategy);
+		
+//		stratege1Executor executor = new stratege1Executor();
+//		executor.execute(null);
 	}
 
 }

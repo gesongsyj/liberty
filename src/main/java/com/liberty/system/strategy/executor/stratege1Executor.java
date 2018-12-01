@@ -16,6 +16,7 @@ import com.liberty.common.utils.MailUtil;
 import com.liberty.system.blackHouse.RemoveStrategyBh;
 import com.liberty.system.model.Centre;
 import com.liberty.system.model.Currency;
+import com.liberty.system.model.Kline;
 import com.liberty.system.model.Line;
 import com.liberty.system.model.Strategy;
 import com.liberty.system.model.Stroke;
@@ -47,13 +48,24 @@ public class stratege1Executor implements Executor {
 			}
 			multiProExe(allCurrency, stayCurrency);
 		} else {
-			if (!RemoveStrategyBh.inBlackHouse(code) && executeSingle(code)) {//不在小黑屋里且满足策略
-				Currency currency = Currency.dao.findByCode(code);
-				successStrategy(currency);
-				stayCurrency.add(currency);
+			Currency currency = Currency.dao.findByCode(code);
+			if (!RemoveStrategyBh.inBlackHouse(code)) {//不在小黑屋里且满足策略
+				if(executeSingle(code)) {
+					if(successStrategy(currency)) {
+						stayCurrency.add(currency);
+					}
+				}else {
+					Record record = Db.findFirst("select * from currency_strategy where cutLine is not null and currencyId=? and strategyId=?",
+							currency.getId(), strategy.getId());
+					if(record!=null) {
+						Db.delete("currency_strategy",record);
+					}
+				}
 			}
 		}
-		MailUtil.sendMailToBuy(stayCurrency, this.getStrategy());
+		if(stayCurrency.size()!=0) {
+			MailUtil.sendMailToBuy(stayCurrency, this.getStrategy());
+		}
 		return stayCurrency;
 	}
 
@@ -64,8 +76,18 @@ public class stratege1Executor implements Executor {
 				@Override
 				public void run() {
 					if (executeSingle(currency.getCode())) {
-						successStrategy(currency);
-						sc.add(currency);
+						System.err.println("满足策略:"+currency.getCode()+":"+currency.getName());
+						if(successStrategy(currency)) {
+							System.err.println("不存在");
+							sc.add(currency);
+						}
+						System.err.println("已存在");
+					}else {
+						Record record = Db.findFirst("select * from currency_strategy where cutLine is null and currencyId=? and strategyId=?",
+								currency.getId(), strategy.getId());
+						if(record!=null) {
+							Db.delete("currency_strategy",record);
+						}
 					}
 				}
 			});
@@ -75,7 +97,7 @@ public class stratege1Executor implements Executor {
 		try {
 			// 请求关闭、发生超时或者当前线程中断，无论哪一个首先发生之后，都将导致阻塞，直到所有任务完成执行
 			// 设置最长等待30秒
-			threadPool.awaitTermination(30, TimeUnit.SECONDS);
+			threadPool.awaitTermination(300, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -99,6 +121,12 @@ public class stratege1Executor implements Executor {
 		}
 	}
 
+	/**
+	 * 判断是否满足策略
+	 * @param strokes
+	 * @param lastLine
+	 * @return
+	 */
 	private boolean onStrategy(List<Stroke> strokes, Line lastLine) {
 		Integer currencyId = strokes.get(0).getCurrencyId();
 		Currency currency = Currency.dao.findById(currencyId);
@@ -156,6 +184,12 @@ public class stratege1Executor implements Executor {
 						}
 						Centre lastCentre = buildLastCentre(list);
 						if (lastCentre != null && strokes.get(i + 2).getMin() > lastCentre.getCentreMax()) {
+							List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", strokes.get(i + 2).getEndDate());
+							for (Kline kline : klines) {
+								if(kline.getMin()<=lastCentre.getCentreMax()) {
+									return false;
+								}
+							}
 							return true;
 						} else {
 							return false;
@@ -177,6 +211,12 @@ public class stratege1Executor implements Executor {
 							}
 							Centre lastCentre = buildLastCentre(list);
 							if (lastCentre != null && strokes.get(i + 2).getMin() > lastCentre.getCentreMax()) {
+								List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", strokes.get(i + 2).getEndDate());
+								for (Kline kline : klines) {
+									if(kline.getMin()<=lastCentre.getCentreMax()) {
+										return false;
+									}
+								}
 								return true;
 							} else {
 								return false;
@@ -195,7 +235,12 @@ public class stratege1Executor implements Executor {
 		return false;
 	}
 
-	public void successStrategy(Currency currency) {
+	/**
+	 * 满足策略,判断记录是否存在,执行不同的操作
+	 * @param currency
+	 * @return
+	 */
+	public boolean successStrategy(Currency currency) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Record record = Db.findFirst("select * from currency_strategy where currencyId=? and strategyId=?",
 				currency.getId(), this.strategy.getId());
@@ -203,13 +248,20 @@ public class stratege1Executor implements Executor {
 			record = new Record().set("currencyId", currency.getId()).set("strategyId", this.strategy.getId())
 					.set("startDate", format.format(new Date()));
 			Db.save("currency_strategy", record);
+			return true;
 		} else {
 			record.set("startDate", format.format(new Date()));
 			Db.update("currency_strategy", record);
+			//如果已经存在该条记录,只是做更新时间的处理
+			return false;
 		}
-		System.err.println(record);
 	}
 
+	/**
+	 * 构建最近的一个中枢
+	 * @param strokes
+	 * @return
+	 */
 	public Centre buildLastCentre(List<Stroke> strokes) {
 		double max, min, centreMax, centreMin;
 		Centre centre = null;

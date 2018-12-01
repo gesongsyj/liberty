@@ -34,11 +34,6 @@ import com.liberty.system.strategy.executor.Executor;
 import com.liberty.system.strategy.executor.stratege1Executor;
 
 public class KlineController extends BaseController {
-	private List<Executor> exes=new ArrayList<Executor>();
-	
-	public KlineController() {
-		exes.add(new stratege1Executor());
-	}
 
 	private static final Map<String, String> klineTypeNumberMap;
 	private static final Map<String, Integer> klineTypeBetweenMap;
@@ -394,9 +389,6 @@ public class KlineController extends BaseController {
 					downloadData(currency.getCode());
 					createStroke(currency.getCode());
 					createLine(currency.getCode());
-					for (Executor exe : exes) {
-						exe.execute(currency.getCode());
-					}
 				}
 			});
 		}

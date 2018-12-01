@@ -4,13 +4,20 @@ public class CurrencyQueryObject extends QueryObject {
 	private String name;
 	private String code;
 	private String keyword;
-	private boolean followed;
+	private String cutLine;
+	private String followed;
 	
-	public boolean getFollowed() {
+	public String getFollowed() {
 		return followed;
 	}
-	public void setFollowed(boolean followed) {
+	public void setFollowed(String followed) {
 		this.followed = followed;
+	}
+	public String getCutLine() {
+		return cutLine;
+	}
+	public void setCutLine(String cutLine) {
+		this.cutLine = cutLine;
 	}
 	public String getName() {
 		return name;
