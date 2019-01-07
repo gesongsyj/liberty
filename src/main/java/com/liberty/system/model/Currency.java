@@ -18,7 +18,7 @@ import com.liberty.system.query.StrokeQueryObject;
 @SuppressWarnings("serial")
 public class Currency extends BaseCurrency<Currency> {
 	public static final Currency dao = new Currency().dao();
-	
+
 //	private List<Strategy> strategies;
 //
 //	public String getStrategies() {

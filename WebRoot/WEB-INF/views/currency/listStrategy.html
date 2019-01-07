@@ -63,7 +63,7 @@
 							class="form-control" id="exampleInputEmail" name="qo.code" value="${(qo.code)!''}">
 					</div>
 					 <label class="btn btn-primary" style="margin-left: 3%">
-					    <input type="checkbox" autocomplete="off" name="qo.cutLine" <#if (qo.cutLine)??>checked<#else></#if>>止损线
+					    <input type="checkbox" autocomplete="off" name="qo.cutLine" <#if (qo.cutLine)??>checked<#else></#if>/>止损线
 					  </label>
 					<button id="query" type="submit" class="btn btn-default"
 						style="margin-left: 3%">Search</button>
@@ -98,6 +98,11 @@
 								<td>未设置
 							</#if>
 							<td><a class="btn btn-primary" href="../kline/charts?currencyId=${p.id}" role="button" target="_Blank">查看图表</a>
+								<#if (p.followed)?? && p.followed>
+									<a class="btn btn-danger" href="../currency/addFollowForStarage?currencyId=${p.id}&followed=false&qo.currentPage=${qo.currentPage}&qo.name=${(qo.name)!''}&qo.code=${(qo.code)!''}" role="button">取消标记</a>
+								<#else>
+									<a class="btn btn-success" href="../currency/addFollowForStarage?currencyId=${p.id}&followed=true&qo.currentPage=${qo.currentPage}&qo.name=${(qo.name)!''}&qo.code=${(qo.code)!''}" role="button">添加标记</a>
+								</#if>
 								<a class="btn btn-danger" href="../currency/removeFromStrategy?csId=${p.csId}&qo.currentPage=${qo.currentPage}" role="button" target="_Blank">移出策略池</a>
 								<button type="button" class="btn btn-success"
 										data-toggle="modal" data-target="#myModal" 

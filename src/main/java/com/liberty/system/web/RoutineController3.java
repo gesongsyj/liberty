@@ -15,7 +15,7 @@ import com.liberty.system.strategy.cuttor.LossCuttor;
 public class RoutineController3 extends BaseController implements Job {
 
 	/**
-	 * 根据涨幅榜添加新的股票数据,一周左右更新一次,否则数据量可能过多,没必要
+	 * 根据涨幅榜添加新的股票数据
 	 */
 	@Override
 	public void execute(JobExecutionContext context)

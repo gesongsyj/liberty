@@ -21,7 +21,7 @@ import com.liberty.system.strategy.executor.stratege1Executor;
 public class RoutineController5 extends BaseController implements Job {
 	private List<Executor> exes=new ArrayList<Executor>();
 	/**
-	 * 根据涨幅榜添加新的股票数据,一周左右更新一次,否则数据量可能过多,没必要
+	 * 策略执行
 	 */
 	@Override
 	public void execute(JobExecutionContext context)

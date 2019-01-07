@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.jfinal.plugin.activerecord.Db;
@@ -55,11 +56,12 @@ public class stratege1Executor implements Executor {
 						stayCurrency.add(currency);
 					}
 				}else {
-					Record record = Db.findFirst("select * from currency_strategy where cutLine is not null and currencyId=? and strategyId=?",
-							currency.getId(), strategy.getId());
-					if(record!=null) {
-						Db.delete("currency_strategy",record);
-					}
+//					不自动从策略组中剔除,自动剔除容易错过符合条件的股票
+//					Record record = Db.findFirst("select * from currency_strategy where cutLine is not null and currencyId=? and strategyId=?",
+//							currency.getId(), strategy.getId());
+//					if(record!=null) {
+//						Db.delete("currency_strategy",record);
+//					}
 				}
 			}
 		}
@@ -70,9 +72,11 @@ public class stratege1Executor implements Executor {
 	}
 
 	public void multiProExe(List<Currency> cs, Vector<Currency> sc) {
+		long start = System.currentTimeMillis();
+		List<Future> futureList = new ArrayList<>();
 		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (Currency currency : cs) {
-			threadPool.execute(new Runnable() {
+			Future<?> future = threadPool.submit(new Runnable() {
 				@Override
 				public void run() {
 					if (executeSingle(currency.getCode())) {
@@ -91,17 +95,18 @@ public class stratege1Executor implements Executor {
 					}
 				}
 			});
+			futureList.add(future);
 		}
-		// 启动一次顺序关闭，执行以前提交的任务，但不接受新任务。
-		threadPool.shutdown();
-		try {
-			// 请求关闭、发生超时或者当前线程中断，无论哪一个首先发生之后，都将导致阻塞，直到所有任务完成执行
-			// 设置最长等待30秒
-			threadPool.awaitTermination(300, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (Future future : futureList) {
+			try {
+				future.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+		long end = System.currentTimeMillis();
+		double time = (end - start) * 1.0 / 1000 / 60;
+		MailKit.send("530256489@qq.com", null, "策略[二三买重合]执行耗时提醒!", "此次策略执行耗时:" + time + "分钟!");
 	}
 
 	public boolean executeSingle(String code) {
