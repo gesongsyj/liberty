@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -18,6 +19,7 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfplugin.mail.MailKit;
+import com.liberty.common.plugins.threadPoolPlugin.ThreadPoolKit;
 import com.liberty.common.utils.DateUtil;
 import com.liberty.common.utils.HTTPUtils;
 import com.liberty.common.utils.ResultMsg;
@@ -388,25 +390,30 @@ public class KlineController extends BaseController {
 	@Before(Tx.class)
 	public void multiProData(List<Currency> cs) {
 		long start = System.currentTimeMillis();
-		List<Future> futureList = new ArrayList<>();
-		ExecutorService threadPool = Executors.newFixedThreadPool(4);
-		for (Currency currency : cs) {
-			Future<?> future = threadPool.submit(new Runnable() {
-				@Override
-				public void run() {
-					downloadData(currency.getCode());
-					createStroke(currency.getCode());
-					createLine(currency.getCode());
-				}
-			});
-			futureList.add(future);
-		}
-		for (Future future : futureList) {
-			try {
-				future.get();
-			} catch (Exception e) {
-				e.printStackTrace();
+		ThreadPoolExecutor executor = ThreadPoolKit.getExecutor();
+		int queueSize = executor.getQueue().size();
+		for (int i = 0; i < cs.size(); i++) {
+			List<Future> futureList = new ArrayList<>();
+			for (int j = 0; j < queueSize && i < cs.size(); j++, i++) {
+				Currency currency = cs.get(i);
+				Future<?> future = executor.submit(new Runnable() {
+					@Override
+					public void run() {
+						downloadData(currency.getCode());
+						createStroke(currency.getCode());
+						createLine(currency.getCode());
+					}
+				});
+				futureList.add(future);
 			}
+			for (Future future : futureList) {
+				try {
+					future.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			i--;
 		}
 		long end = System.currentTimeMillis();
 		double time = (end - start) * 1.0 / 1000 / 60;
