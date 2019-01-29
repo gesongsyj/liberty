@@ -1,5 +1,6 @@
 package com.liberty.common.jfinal;
 
+import java.util.List;
 import java.util.Vector;
 
 import com.jfinal.config.Constants;
@@ -133,6 +134,10 @@ public class CoreConfig extends JFinalConfig {
 
 //		stratege1Executor executor = new stratege1Executor();
 //		executor.execute(null);
+		
+		KlineController klineController = new KlineController();
+		List<Currency> listAll = Currency.dao.listAll();
+		klineController.multiProData(listAll);
 	}
 
 }

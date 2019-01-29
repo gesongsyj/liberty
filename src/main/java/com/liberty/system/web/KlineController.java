@@ -214,7 +214,6 @@ public class KlineController extends BaseController {
 	public void downloadData(String includeCurrencyCode) {
 //		DownLoader downLoader = new XlDownLoader();
 		DownLoader downLoader = new DfcfDownLoader();
-		List<Currency> listAll = Currency.dao.listAll();
 
 		String sql = "select * from dictionary where type='klineType_gp'";
 		List<Record> klineType = Db.find(sql);
@@ -278,7 +277,6 @@ public class KlineController extends BaseController {
 	 */
 	@Before(Tx.class)
 	public void createStroke(String includeCurrencyCode) {
-		List<Currency> listAll = Currency.dao.listAll();
 		String sql = "select * from dictionary where type='klineType_gp'";
 		List<Record> klineType = Db.find(sql);
 		for (Record record : klineType) {
@@ -391,7 +389,7 @@ public class KlineController extends BaseController {
 	public void multiProData(List<Currency> cs) {
 		long start = System.currentTimeMillis();
 		ThreadPoolExecutor executor = ThreadPoolKit.getExecutor();
-		int queueSize = executor.getQueue().size();
+		int queueSize = executor.getQueue().remainingCapacity();
 		for (int i = 0; i < cs.size(); i++) {
 			List<Future> futureList = new ArrayList<>();
 			for (int j = 0; j < queueSize && i < cs.size(); j++, i++) {

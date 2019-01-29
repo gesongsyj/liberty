@@ -2,6 +2,7 @@ package com.liberty.system.downloader.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,25 +44,27 @@ public class DfcfDownLoader implements DownLoader {
 		Object data = responseMap.get("data");
 		List<String> dataArr = JSON.parseArray(data.toString(), String.class);
 		List<Kline> klines = new ArrayList<Kline>();
-		for (String s : dataArr) {
-			String[] str = s.split(",");
+		for (int i = dataArr.size() - 1; i >= 0; i--) {
+			String[] str = dataArr.get(i).split(",");
 			Date date = null;
 			if (str[0].contains(" ")) {
 				date = DateUtil.strDate(str[0], "yyyy-MM-dd HH:mm");
 			} else {
 				date = DateUtil.strDate(str[0], "yyyy-MM-dd");
 			}
-			if (lastDate !=null && date.getTime() <= lastDate.getTime()) {
-				continue;
+			if (lastDate != null && date.getTime() > lastDate.getTime()) {
+				Kline kline = new Kline();
+				kline.setDate(date);
+				kline.setOpen(Double.valueOf(str[1]));
+				kline.setClose(Double.valueOf(str[2]));
+				kline.setMax(Double.valueOf(str[3]));
+				kline.setMin(Double.valueOf(str[4]));
+				klines.add(kline);
+			}else {
+				break;
 			}
-			Kline kline = new Kline();
-			kline.setDate(date);
-			kline.setOpen(Double.valueOf(str[1]));
-			kline.setClose(Double.valueOf(str[2]));
-			kline.setMax(Double.valueOf(str[3]));
-			kline.setMin(Double.valueOf(str[4]));
-			klines.add(kline);
 		}
+		Collections.reverse(klines);
 		return klines;
 	}
 
