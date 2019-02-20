@@ -7,3 +7,7 @@
 		#set(flag=1)
 	#end
 #end
+
+#sql("getAll")
+	select * from strategy
+#end

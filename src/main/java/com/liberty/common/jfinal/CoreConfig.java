@@ -135,9 +135,9 @@ public class CoreConfig extends JFinalConfig {
 //		stratege1Executor executor = new stratege1Executor();
 //		executor.execute(null);
 		
-		KlineController klineController = new KlineController();
-		List<Currency> listAll = Currency.dao.listAll();
-		klineController.multiProData(listAll);
+//		KlineController klineController = new KlineController();
+//		List<Currency> listAll = Currency.dao.listAll();
+//		klineController.multiProData(listAll);
 	}
 
 }

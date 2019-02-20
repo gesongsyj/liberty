@@ -18,4 +18,10 @@ public class Strategy extends BaseStrategy<Strategy>{
 		List<Strategy> list = dao.find(sqlPara);
 		return list;
 	}
+
+	public List<Strategy> getAll() {
+		String sql = getSqlFromTemplate();
+		List<Strategy> list = dao.find(sql);
+		return list;
+	}
 }

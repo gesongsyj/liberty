@@ -26,6 +26,35 @@
 					$('#currencyForm').submit();
 				}
 			});
+			$('.addStrategy_btn').click(function(){
+				console.log("111");
+				$(function(){
+				      $.ajax({
+				        type:'post',
+				        url:"queryStrategy",
+				        dataType:"json",
+				        success:function(data){
+				          $("#strategy_select").empty();
+				          $("#strategy_select").append("<option value=''>请选择策略</option>");
+				          for(var i=0;i<data.p2pdata.length;i++){
+				            $("#strategy_select").append('<option value='+data.p2pdata[i].id+'>'+data.p2pdata[i].describe+'</option>');
+				          }
+				       }
+				      })
+				})
+			});
+			$('#myModal').on('show.bs.modal', function (event) {
+				  var button = $(event.relatedTarget);
+				  var id = button.data('id');
+				  var currentPage = button.data('currentpage');
+				  var modal = $(this);
+				  $('#addStrategyForm #id').val(id);
+				  $('#addStrategyForm #currentPage').val(currentPage);
+				  console.log($('#addStrategyForm #currentPage').val());
+			});
+			$('#addStrategy_yes').click(function() {
+				$('#addStrategyForm').submit();
+			});
 		})
 
 </script>
@@ -48,11 +77,11 @@
 						<label for="exampleInputEmail2">股票代码</label> <input type="text"
 							class="form-control" id="exampleInputEmail" name="qo.code" value="${(qo.code)!''}">
 					</div>
+					<button id="query" type="submit" class="btn btn-default"
+						style="margin-left: 3%">Search</button>
 					 <label class="btn btn-primary" style="margin-left: 3%">
 						 <input type="checkbox" autocomplete="off" name="qo.followed" <#if (qo.followed)??>checked<#else></#if>/>是否标记
 					  </label>
-					<button id="query" type="submit" class="btn btn-default"
-						style="margin-left: 3%">Search</button>
 					<a class="btn btn-success" href="../currency/updateData" role="button" style="margin-left: 1%">统一更新数据</a>
 				</form>
 				<table class="table table-bordered" style="margin-top: 50px;">
@@ -87,7 +116,11 @@
 								<#else>
 									<a class="btn btn-success" href="../currency/addFollow?currencyId=${p.id}&followed=true&qo.currentPage=${qo.currentPage}&qo.name=${(qo.name)!''}&qo.code=${(qo.code)!''}" role="button">添加标记</a>
 								</#if>
-								<a class="btn btn-warning" href="../currency/delete?currencyId=${p.id}&qo.currentPage=${qo.currentPage}" role="button">删除该股</a>
+								<button type="button" class="btn btn-warning addStrategy_btn"
+										data-toggle="modal" data-target="#myModal" 
+										data-id="${p.id}" data-currentpage="${qo.currentPage}" 
+										<#if (p.csid)?? > disabled</#if>>加入策略池</button>
+								<a class="btn btn-danger" href="../currency/delete?currencyId=${p.id}&qo.currentPage=${qo.currentPage}" role="button">删除该股</a>
 							</td>
 						
 						</tr>
@@ -100,5 +133,35 @@
 			</div>
 		</div>
 	</div>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="exampleModalLabel">选择策略</h4>
+	      </div>
+	      
+	       <div class="modal-body" style="text-align: center;"
+					id="down_btn_text">
+		      	<form id="addStrategyForm" action="addStrategy" class="form-inline"
+										 method="post">
+					<input hidden="true" id="id" name="id" />
+					<input hidden="true" id="currentPage" name="qo.currentPage" />
+					<div class="form-group">策略列表: 
+						<select id="strategy_select" class="form-control" name="strategyId">
+						</select>
+					</div>
+				</form>
+	      </div>
+		   <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" class="btn btn-primary" id="addStrategy_yes">确认</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
 </body>
 </html>

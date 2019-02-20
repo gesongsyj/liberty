@@ -62,12 +62,15 @@
 						<label for="exampleInputEmail2">股票代码</label> <input type="text"
 							class="form-control" id="exampleInputEmail" name="qo.code" value="${(qo.code)!''}">
 					</div>
+					<button id="query" type="submit" class="btn btn-default"
+						style="margin-left: 3%">Search</button>
 					 <label class="btn btn-primary" style="margin-left: 3%">
 					    <input type="checkbox" autocomplete="off" name="qo.cutLine" <#if (qo.cutLine)??>checked<#else></#if>/>止损线
 					  </label>
-					<button id="query" type="submit" class="btn btn-default"
-						style="margin-left: 3%">Search</button>
-					<a class="btn btn-success" href="../currency/updateData" role="button" style="margin-left: 1%">统一更新数据</a>
+					  <label class="btn btn-primary" style="margin-left: 3%">
+						 <input type="checkbox" autocomplete="off" name="qo.followed" <#if (qo.followed)??>checked<#else></#if>/>是否标记
+					  </label>
+					<a class="btn btn-success" href="../currency/updateStrategtData" role="button" style="margin-left: 1%">统一更新策略池数据</a>
 				</form>
 				<table class="table table-bordered" style="margin-top: 50px;">
 					<thead>

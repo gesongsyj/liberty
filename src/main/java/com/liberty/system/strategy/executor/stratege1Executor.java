@@ -55,14 +55,15 @@ public class stratege1Executor implements Executor {
 					if(successStrategy(currency)) {
 						stayCurrency.add(currency);
 					}
-				}else {
+				}
+//				else {
 //					不自动从策略组中剔除,自动剔除容易错过符合条件的股票
 //					Record record = Db.findFirst("select * from currency_strategy where cutLine is not null and currencyId=? and strategyId=?",
 //							currency.getId(), strategy.getId());
 //					if(record!=null) {
 //						Db.delete("currency_strategy",record);
 //					}
-				}
+//				}
 			}
 		}
 		if(stayCurrency.size()!=0) {

@@ -1,6 +1,6 @@
 #sql("paginate")
-	select *
-	from currency
+	select c.*,cs.id as csid
+	from currency c left join currency_strategy cs on cs.currencyId=c.id
 	#set(flag=0)
 	#if(qo.name)
 		#(flag==0?"where":"and") name like concat("%",#para(qo.name),"%")
@@ -32,6 +32,10 @@
 		#(flag==0?"where":"and") cs.cutLine is not null
 		#set(flag=1)
 	#end
+	#if(qo.followed)
+		#(flag==0?"where":"and") c.followed=1
+		#set(flag=1)
+	#end
 #end
 
 #sql("findByCode")
@@ -50,4 +54,8 @@
 
 #sql("listAllByCutLine")
 	select * from currency where cutLine != null
+#end
+
+#sql("listForStrategy")
+	select * from currency c join currency_strategy cs on cs.currencyId=c.id
 #end

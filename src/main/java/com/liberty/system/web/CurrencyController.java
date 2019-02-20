@@ -2,6 +2,7 @@ package com.liberty.system.web;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +38,32 @@ import com.liberty.system.query.KlineQueryObject;
 
 public class CurrencyController extends BaseController {
 	/**
-	 *统一更新数据库所有股票的数据
+	 * 查询所有策略
+	 */
+	@Before(Tx.class)
+	public void queryStrategy() {
+		List<Strategy> ss = Strategy.dao.getAll();
+		renderJson(new ResultMsg(ResultStatusCode.OK, ss));
+	}
+
+	/**
+	 * 添加到策略池
+	 */
+	@Before(Tx.class)
+	public void addStrategy() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
+		String id = paras.get("id");
+		String strategyId = paras.get("strategyId");
+		
+		Record record = new Record().set("currencyId", id).set("strategyId", strategyId)
+				.set("startDate", format.format(new Date()));
+		Db.save("currency_strategy", record);
+		redirect("/currency/list?qo.currentPage=" + qo.getCurrentPage());
+	}
+
+	/**
+	 * 统一更新数据库所有股票的数据
 	 */
 	@Before(Tx.class)
 	public void updateData() {
@@ -46,7 +72,18 @@ public class CurrencyController extends BaseController {
 		klineController.multiProData(listAll);
 		redirect("/currency/list");
 	}
-	
+
+	/**
+	 * 统一更新策略池所有股票的数据
+	 */
+	@Before(Tx.class)
+	public void updateStrategtData() {
+		KlineController klineController = new KlineController();
+		List<Currency> listAll = Currency.dao.listForStrategy();
+		klineController.multiProData(listAll);
+		redirect("/currency/list");
+	}
+
 	/**
 	 * 抓取财经网站深证,沪证涨幅排行榜前n位的股票添加到数据库并下载数据
 	 */
@@ -59,7 +96,7 @@ public class CurrencyController extends BaseController {
 		klineController.multiProData(cs);
 		redirect("/currency/list");
 	}
-	
+
 	/**
 	 * 对该股添加标记,后续可能有期望的走势出现
 	 */
@@ -67,13 +104,13 @@ public class CurrencyController extends BaseController {
 	public void addFollow() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
-		String followed=paras.get("followed");
+		String followed = paras.get("followed");
 		Currency currency = Currency.dao.findById(currencyId);
 		currency.setFollowed(Boolean.valueOf(followed));
 		currency.update();
 		redirect("/currency/list", true);
 	}
-	
+
 	/**
 	 * 对该股添加标记,后续可能有期望的走势出现
 	 */
@@ -81,15 +118,15 @@ public class CurrencyController extends BaseController {
 	public void addFollowForStarage() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
-		String followed=paras.get("followed");
+		String followed = paras.get("followed");
 		Currency currency = Currency.dao.findById(currencyId);
 		currency.setFollowed(Boolean.valueOf(followed));
 		currency.update();
-		redirect("/currency/listStrategy",true);
+		redirect("/currency/listStrategy", true);
 	}
-	
+
 	/**
-	 * 数据库已有股票的分页查询
+	 * 策略池股票的分页查询
 	 */
 	public void listStrategy() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
@@ -98,7 +135,7 @@ public class CurrencyController extends BaseController {
 		setAttr("qo", qo);
 		render("listStrategy.html");
 	}
-	
+
 	/**
 	 * 数据库已有股票的分页查询
 	 */
@@ -115,11 +152,11 @@ public class CurrencyController extends BaseController {
 	 */
 	public void addSearch() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
-		String keyword=qo.getKeyword();
+		String keyword = qo.getKeyword();
 		List<Currency> cs = new ArrayList<Currency>();
 		if (keyword != null) {
 			try {
-				keyword=URLEncoder.encode(keyword, "utf-8");
+				keyword = URLEncoder.encode(keyword, "utf-8");
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -156,7 +193,7 @@ public class CurrencyController extends BaseController {
 //			return;
 //		}
 		Currency c = getBean(Currency.class, "c");
-		if(c.getCode()==null || c.getName()==null || c.getCurrencyType()==null){
+		if (c.getCode() == null || c.getName() == null || c.getCurrencyType() == null) {
 			renderJson(new ResultMsg(ResultStatusCode.INVALID_INPUT));
 			return;
 		}
@@ -178,12 +215,12 @@ public class CurrencyController extends BaseController {
 		klineController.createLine(c.getCode());
 		redirect("/currency/list");
 	}
-	
+
 	/**
 	 * 删除该股
 	 */
 	@Before(Tx.class)
-	public  void delete() {
+	public void delete() {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String currencyId = paras.get("currencyId");
 		Db.update("delete from kline where currencyId=?", currencyId);
@@ -191,10 +228,10 @@ public class CurrencyController extends BaseController {
 		Db.update("delete from stroke where currencyId=?", currencyId);
 		Db.update("UPDATE line SET prevId =null,nextId=null where currencyId=?", currencyId);
 		Db.update("delete from line where currencyId=?", currencyId);
-		Db.update("delete from currency where id=?",currencyId);
-		redirect("/currency/list?qo.currentPage="+qo.getCurrentPage());
+		Db.update("delete from currency where id=?", currencyId);
+		redirect("/currency/list?qo.currentPage=" + qo.getCurrentPage());
 	}
-	
+
 	/**
 	 * 设置止损线
 	 */
@@ -203,16 +240,16 @@ public class CurrencyController extends BaseController {
 		CurrencyQueryObject qo = getBean(CurrencyQueryObject.class, "qo");
 		String id = paras.get("id");
 		String cutStr = paras.get("cutLine").toString();
-		Double cutLine=null;
-		if(!"null".equals(cutStr)) {
-			cutLine=Double.valueOf(paras.get("cutLine").toString());
+		Double cutLine = null;
+		if (!"null".equals(cutStr)) {
+			cutLine = Double.valueOf(paras.get("cutLine").toString());
 		}
 		Record record = Db.findById("currency_strategy", id);
 		record.set("cutLine", cutLine);
 		Db.update("currency_strategy", record);
-		redirect("/currency/listStrategy?qo.currentPage="+qo.getCurrentPage());
+		redirect("/currency/listStrategy?qo.currentPage=" + qo.getCurrentPage());
 	}
-	
+
 	/**
 	 * 从策略池移除
 	 */
@@ -222,8 +259,8 @@ public class CurrencyController extends BaseController {
 		String csId = paras.get("csId");
 		Record record = Db.findById("currency_strategy", csId);
 		Currency currency = Currency.dao.findById(record.getInt("currencyId"));
-		RemoveStrategyBh.add(currency, new Date());//关进小黑屋
+		RemoveStrategyBh.add(currency, new Date());// 关进小黑屋
 		Db.delete("currency_strategy", record);
-		redirect("/currency/listStrategy?qo.currentPage="+qo.getCurrentPage());
+		redirect("/currency/listStrategy?qo.currentPage=" + qo.getCurrentPage());
 	}
 }

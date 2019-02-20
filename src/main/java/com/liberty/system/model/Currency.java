@@ -67,4 +67,10 @@ public class Currency extends BaseCurrency<Currency> {
 		return page;
 	}
 
+	public List<Currency> listForStrategy() {
+		String sql = getSqlFromTemplate();
+		List<Currency> list = dao.find(sql);
+		return list;
+	}
+
 }
