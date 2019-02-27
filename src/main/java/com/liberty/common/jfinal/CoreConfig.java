@@ -28,7 +28,6 @@ import com.liberty.common.plugins.threadPoolPlugin.ThreadPoolPlugin;
 import com.liberty.common.utils.MailUtil;
 import com.liberty.system.model.Currency;
 import com.liberty.system.model.Strategy;
-import com.liberty.system.strategy.executor.stratege1Executor;
 import com.liberty.system.web.CurrencyController;
 import com.liberty.system.web.KlineController;
 
@@ -121,9 +120,6 @@ public class CoreConfig extends JFinalConfig {
 //		CurrencyController currencyController = new CurrencyController();
 //		currencyController.updateCurrency();
 
-//		KlineController klineController = new KlineController();
-//		klineController.multiProData();
-
 //		stratege1Executor executor = new stratege1Executor();
 //		Vector<Currency> cs = executor.execute(null);
 
@@ -138,6 +134,22 @@ public class CoreConfig extends JFinalConfig {
 //		KlineController klineController = new KlineController();
 //		List<Currency> listAll = Currency.dao.listAll();
 //		klineController.multiProData(listAll);
+		
+		KlineController klineController = new KlineController();
+		List<Currency> listAll = Currency.dao.listAll();
+		for (Currency currency : listAll) {
+			klineController.downloadData(currency.getCode());
+		}
+		
+		//执行策略二
+//		Stratege2Executor executor = new Stratege2Executor();
+//		executor.execute(null);
+//		executor.execute("600086");
+//		List<Currency> allCurrency = Currency.dao.listAll();
+//		for (int i = 0; i < allCurrency.size(); i++) {
+//			System.out.println("这是第"+i+"只股票");
+//			boolean executeSingle = executor.executeSingle(allCurrency.get(i).getCode());
+//		}
 	}
 
 }

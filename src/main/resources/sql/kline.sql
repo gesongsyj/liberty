@@ -10,7 +10,7 @@
 
 #sql("getLastOneByCode")
 	select k.*
-	from kline k join currency c on k.currencyId=c.id
+	from currency c STRAIGHT_JOIN kline k on k.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code=#para(code)
@@ -25,7 +25,7 @@
 
 #sql("getLastByCode")
 	select k.*
-	from kline k join currency c on k.currencyId=c.id
+	from currency c STRAIGHT_JOIN kline k on k.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code=#para(code)
@@ -41,7 +41,7 @@
 
 #sql("listAllByCode")
 	select k.*
-	from kline k join currency c on k.currencyId=c.id
+	from currency c STRAIGHT_JOIN kline k on k.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code = #para(code)
@@ -56,7 +56,7 @@
 
 #sql("getListByDate")
 	select k.*
-	from kline k join currency c on k.currencyId=c.id
+	from currency c STRAIGHT_JOIN kline k on k.currencyId=c.id
 	#set(flag=0)
 	#if(date)
 		#(flag==0?"where":"and") k.date >= #para(date)
@@ -75,7 +75,7 @@
 
 #sql("getByDateRange")
 	select k.*
-	from kline k join currency c on k.currencyId=c.id
+	from currency c STRAIGHT_JOIN kline k on k.currencyId=c.id
 	#set(flag=0)
 	#if(startDate)
 		#(flag==0?"where":"and") k.date >= #para(startDate)

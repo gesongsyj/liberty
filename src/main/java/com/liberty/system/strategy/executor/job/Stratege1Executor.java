@@ -1,4 +1,4 @@
-package com.liberty.system.strategy.executor;
+package com.liberty.system.strategy.executor.job;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,38 +21,31 @@ import com.liberty.system.model.Kline;
 import com.liberty.system.model.Line;
 import com.liberty.system.model.Strategy;
 import com.liberty.system.model.Stroke;
+import com.liberty.system.strategy.executor.Executor;
 
-public class stratege1Executor implements Executor {
-	private Strategy strategy;
+public class Stratege1Executor extends StrategeExecutor implements Executor {
 
-	public stratege1Executor() {
+	public Stratege1Executor() {
 		this.strategy = Strategy.dao.findById(1);
-	}
-
-	public Strategy getStrategy() {
-		return strategy;
-	}
-
-	public void setStrategy(Strategy strategy) {
-		this.strategy = strategy;
 	}
 
 	@Override
 	public Vector<Currency> execute(String code) {
+		long start = System.currentTimeMillis();
 		Vector<Currency> stayCurrency = new Vector<>();
 		if (code == null) {
 			List<Currency> allCurrency = Currency.dao.listAll();
 			for (Currency currency : allCurrency) {
-				if(RemoveStrategyBh.inBlackHouse(currency)) {//在小黑屋里面,跳过
+				if (RemoveStrategyBh.inBlackHouse(currency)) {// 在小黑屋里面,跳过
 					allCurrency.remove(currency);
 				}
 			}
 			multiProExe(allCurrency, stayCurrency);
 		} else {
 			Currency currency = Currency.dao.findByCode(code);
-			if (!RemoveStrategyBh.inBlackHouse(code)) {//不在小黑屋里且满足策略
-				if(executeSingle(code)) {
-					if(successStrategy(currency)) {
+			if (!RemoveStrategyBh.inBlackHouse(code)) {// 不在小黑屋里且满足策略
+				if (executeSingle(currency)) {
+					if (successStrategy(currency)) {
 						stayCurrency.add(currency);
 					}
 				}
@@ -66,60 +59,27 @@ public class stratege1Executor implements Executor {
 //				}
 			}
 		}
-		if(stayCurrency.size()!=0) {
-			MailUtil.sendMailToBuy(stayCurrency, this.getStrategy());
+		if (stayCurrency.size() != 0) {
+			MailUtil.sendMailToBuy(stayCurrency, super.getStrategy());
 		}
+		System.out.println("策略1执行完毕!");
+		long end = System.currentTimeMillis();
+		double time = (end - start) * 1.0 / 1000 / 60;
+		MailKit.send("530256489@qq.com", null, "策略[" + strategy.getDescribe() + "]执行耗时提醒!", "此次策略执行耗时:" + time + "分钟!");
 		return stayCurrency;
 	}
 
-	public void multiProExe(List<Currency> cs, Vector<Currency> sc) {
-		long start = System.currentTimeMillis();
-		List<Future> futureList = new ArrayList<>();
-		ExecutorService threadPool = Executors.newFixedThreadPool(4);
-		for (Currency currency : cs) {
-			Future<?> future = threadPool.submit(new Runnable() {
-				@Override
-				public void run() {
-					if (executeSingle(currency.getCode())) {
-						System.err.println("满足策略:"+currency.getCode()+":"+currency.getName());
-						if(successStrategy(currency)) {
-							System.err.println("不存在");
-							sc.add(currency);
-						}
-						System.err.println("已存在");
-					}else {
-						Record record = Db.findFirst("select * from currency_strategy where cutLine is null and currencyId=? and strategyId=?",
-								currency.getId(), strategy.getId());
-						if(record!=null) {
-							Db.delete("currency_strategy",record);
-						}
-					}
-				}
-			});
-			futureList.add(future);
-		}
-		for (Future future : futureList) {
-			try {
-				future.get();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		long end = System.currentTimeMillis();
-		double time = (end - start) * 1.0 / 1000 / 60;
-		MailKit.send("530256489@qq.com", null, "策略[二三买重合]执行耗时提醒!", "此次策略执行耗时:" + time + "分钟!");
-	}
-
-	public boolean executeSingle(String code) {
+	@Override
+	public boolean executeSingle(Currency currency) {
 		List<Stroke> strokes = null;
 		List<Line> storeLines = new ArrayList<Line>();// 生成的线段
-		Line lastLine = Line.dao.getLastByCode(code, "k");
+		Line lastLine = Line.dao.getLastByCode(currency.getCode(), "k");
 		if (lastLine == null) {
 			return false;
 		} else {
 			storeLines.add(lastLine);
 			Date date = lastLine.getEndDate();
-			strokes = Stroke.dao.getListByDate(code, "k", date);
+			strokes = Stroke.dao.getListByDate(currency.getCode(), "k", date);
 			if (strokes == null || strokes.size() == 0) {
 				return false;
 			}
@@ -129,11 +89,12 @@ public class stratege1Executor implements Executor {
 
 	/**
 	 * 判断是否满足策略
+	 * 
 	 * @param strokes
 	 * @param lastLine
 	 * @return
 	 */
-	private boolean onStrategy(List<Stroke> strokes, Line lastLine) {
+	public boolean onStrategy(List<Stroke> strokes, Line lastLine) {
 		Integer currencyId = strokes.get(0).getCurrencyId();
 		Currency currency = Currency.dao.findById(currencyId);
 
@@ -188,11 +149,12 @@ public class stratege1Executor implements Executor {
 							list = Stroke.dao.getByDateRange(currency.getId(), "k", lastLine.getEndDate(),
 									strokes.get(i).getEndDate());
 						}
-						Centre lastCentre = buildLastCentre(list);
+						Centre lastCentre = buildLineCentre(list);
 						if (lastCentre != null && strokes.get(i + 2).getMin() > lastCentre.getCentreMax()) {
-							List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", strokes.get(i + 2).getEndDate());
+							List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k",
+									strokes.get(i + 2).getEndDate());
 							for (Kline kline : klines) {
-								if(kline.getMin()<=lastCentre.getCentreMax()) {
+								if (kline.getMin() <= lastCentre.getCentreMax()) {
 									return false;
 								}
 							}
@@ -215,11 +177,12 @@ public class stratege1Executor implements Executor {
 								list = Stroke.dao.getByDateRange(currency.getId(), "k", lastLine.getEndDate(),
 										strokes.get(j).getEndDate());
 							}
-							Centre lastCentre = buildLastCentre(list);
+							Centre lastCentre = buildLineCentre(list);
 							if (lastCentre != null && strokes.get(i + 2).getMin() > lastCentre.getCentreMax()) {
-								List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k", strokes.get(i + 2).getEndDate());
+								List<Kline> klines = Kline.dao.getListByDate(currency.getCode(), "k",
+										strokes.get(i + 2).getEndDate());
 								for (Kline kline : klines) {
-									if(kline.getMin()<=lastCentre.getCentreMax()) {
+									if (kline.getMin() <= lastCentre.getCentreMax()) {
 										return false;
 									}
 								}
@@ -243,6 +206,7 @@ public class stratege1Executor implements Executor {
 
 	/**
 	 * 满足策略,判断记录是否存在,执行不同的操作
+	 * 
 	 * @param currency
 	 * @return
 	 */
@@ -258,81 +222,9 @@ public class stratege1Executor implements Executor {
 		} else {
 			record.set("startDate", format.format(new Date()));
 			Db.update("currency_strategy", record);
-			//如果已经存在该条记录,只是做更新时间的处理
+			// 如果已经存在该条记录,只是做更新时间的处理
 			return false;
 		}
 	}
 
-	/**
-	 * 构建最近的一个中枢
-	 * @param strokes
-	 * @return
-	 */
-	public Centre buildLastCentre(List<Stroke> strokes) {
-		double max, min, centreMax, centreMin;
-		Centre centre = null;
-		for (int i = 1; i < strokes.size() - 2; i++) {
-			if (overlap(strokes.get(i), strokes.get(i + 1), strokes.get(i + 2)) == 0) {
-				if ("0".equals(strokes.get(i).getDirection())) {
-					if (strokes.get(i + 1).getMin() < strokes.get(i).getMin()) {
-						min = strokes.get(i + 1).getMin();
-						centreMin = strokes.get(i).getMin();
-					} else {
-						min = strokes.get(i).getMin();
-						centreMin = strokes.get(i + 1).getMin();
-					}
-					if (strokes.get(i + 2).getMax() > strokes.get(i).getMax()) {
-						max = strokes.get(i + 2).getMax();
-						centreMax = strokes.get(i).getMax();
-					} else {
-						max = strokes.get(i).getMax();
-						centreMax = strokes.get(i + 2).getMax();
-					}
-				} else {
-					if (strokes.get(i + 1).getMax() > strokes.get(i).getMax()) {
-						max = strokes.get(i + 1).getMax();
-						centreMax = strokes.get(i).getMax();
-					} else {
-						max = strokes.get(i).getMax();
-						centreMax = strokes.get(i + 1).getMax();
-					}
-					if (strokes.get(i + 2).getMin() < strokes.get(i).getMin()) {
-						min = strokes.get(i + 2).getMin();
-						centreMin = strokes.get(i).getMin();
-					} else {
-						min = strokes.get(i).getMin();
-						centreMin = strokes.get(i + 2).getMin();
-					}
-				}
-				centre = new Centre();
-				centre.setMax(max).setMin(min).setCentreMax(centreMax).setCentreMin(centreMin);
-				break;
-			} else {
-				continue;
-			}
-		}
-		return centre;
-	}
-
-	/**
-	 * 判断三笔是否重叠
-	 * 
-	 * @param s1
-	 * @param s2
-	 * @param s3
-	 * @return 0:重叠;1:不重叠:方向向上;2:不重叠:方向向下
-	 */
-	protected int overlap(Stroke s1, Stroke s2, Stroke s3) {
-		if ("0".equals(s1.getDirection()) && "0".equals(s3.getDirection())) {
-			if (s1.getMin() > s3.getMax()) {
-				return 2;
-			}
-		}
-		if ("1".equals(s1.getDirection()) && "1".equals(s3.getDirection())) {
-			if (s1.getMax() < s3.getMin()) {
-				return 1;
-			}
-		}
-		return 0;
-	}
 }

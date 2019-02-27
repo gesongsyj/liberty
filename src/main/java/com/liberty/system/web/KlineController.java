@@ -35,7 +35,6 @@ import com.liberty.system.model.Line;
 import com.liberty.system.model.Shape;
 import com.liberty.system.model.Stroke;
 import com.liberty.system.strategy.executor.Executor;
-import com.liberty.system.strategy.executor.stratege1Executor;
 
 public class KlineController extends BaseController {
 

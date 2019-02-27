@@ -129,4 +129,16 @@ public class XlDownLoader implements DownLoader {
 		return klineList;
 	}
 
+	@Override
+	public List<Kline> downLoad(Currency currency, String type, String method, int size) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void downLoadRealTimeData(Currency currency, String type, String method) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

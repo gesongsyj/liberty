@@ -134,4 +134,12 @@ public abstract class BaseKline<T extends BaseKline> extends SuperModel<T> imple
 		return getDouble("dea");
 	}
 
+	public T setAoi(java.lang.Double aoi) {
+		set("aoi", aoi);
+		return (T)this;
+	}
+	
+	public java.lang.Double getAoi() {
+		return getDouble("aoi");
+	}
 }

@@ -10,7 +10,7 @@
 
 #sql("getLastByCode")
 	select s.*
-	from stroke s join currency c on s.currencyId=c.id
+	from currency c STRAIGHT_JOIN stroke s on s.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code = #para(code)
@@ -25,7 +25,7 @@
 
 #sql("listAllByCode")
 	select s.*
-	from stroke s join currency c on s.currencyId=c.id
+	from currency c STRAIGHT_JOIN stroke s on s.currencyId=c.id
 	#set(flag=0)
 	#if(code)
 		#(flag==0?"where":"and") c.code = #para(code)
@@ -40,14 +40,14 @@
 
 #sql("getListByDate")
 	select s.*
-	from stroke s join currency c on s.currencyId=c.id
+	from currency c STRAIGHT_JOIN stroke s on s.currencyId=c.id
 	#set(flag=0)
-	#if(date)
-		#(flag==0?"where":"and") s.endDate > #para(date)
-		#set(flag=1)
-	#end
 	#if(code)
 		#(flag==0?"where":"and") c.code = #para(code)
+		#set(flag=1)
+	#end
+	#if(date)
+		#(flag==0?"where":"and") s.endDate > #para(date)
 		#set(flag=1)
 	#end
 	#if(type)
